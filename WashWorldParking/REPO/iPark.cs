@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using WashWorldParking.MDL;
 
 namespace WashWorldParking.REPO
 {

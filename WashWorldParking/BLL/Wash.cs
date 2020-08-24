@@ -16,5 +16,17 @@ namespace WashWorldParking.BLL
         {
             return null;
         }
+
+        public string WashCar(string lPLate)
+        {
+            return "Welcome to my cadaver";
+        }
+
+        public bool CreateAccount(string lPlate, string cCard, string eMail)
+        {
+            bool result = false;
+
+            return result;
+        }
     }
 }
