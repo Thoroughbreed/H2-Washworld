@@ -5,4 +5,14 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="mono_crash.11a6748113.0.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="BLL\" />
+    <Folder Include="DAL\" />
+    <Folder Include="MDL\" />
+    <Folder Include="REPO\" />
+    <Folder Include="UTIL\" />
+  </ItemGroup>
 </Project>
