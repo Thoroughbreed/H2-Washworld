@@ -5,7 +5,7 @@ namespace WashWorldParking.UTIL
 {
     static class FileLogger
     {
-        static string fileName = "logs.bnk";
+        static string fileName = "logs.prk";
 
         public static void WriteToLog(string logmessage)
         {
@@ -18,7 +18,7 @@ namespace WashWorldParking.UTIL
             DirectoryInfo findLog = new DirectoryInfo(Environment.CurrentDirectory);
             foreach (FileInfo filer in findLog.GetFiles())
             {
-                if (filer.Extension == ".bnk")
+                if (filer.Extension == ".prk")
                 {
                     return File.ReadAllText(filer.FullName);
                 }
