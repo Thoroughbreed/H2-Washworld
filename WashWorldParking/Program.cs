@@ -8,18 +8,17 @@ namespace WashWorldParking
     {
         static void Main(string[] args)
         {
-            Console.Clear();
-            Console.WriteLine(args[0]);
-
             ConsoleKeyInfo menuKey;
             ConsoleKeyInfo subMenuKey;
             string lPlate;
-            
-            Park myPark = new Park("Parkworld");
+            bool isAdmin = false;
+
+        Park myPark = new Park("Parkworld");
             Wash myWash = new Wash("Waterworld");
             do
             {
-                Menu(myPark.ParkName, myWash.WashName);
+                if (args[0] == "-admin") isAdmin = AdminMenu();
+                else Menu(myPark.ParkName, myWash.WashName);
                 menuKey = Console.ReadKey(true);
                 switch (menuKey.Key)
                 {
@@ -80,41 +79,49 @@ namespace WashWorldParking
                         MenuWait();
                         break;
                     case ConsoleKey.A:
-                        do
+                        if (!isAdmin)
                         {
-                            Console.Write("Please input your license plate: ");
-                            lPlate = Console.ReadLine();
-                            Console.Write("Please input how many hours you want to add: ");
-                            string stringTime = Console.ReadLine();
-                            int addedTime = 0;
-                            try
+                            do
                             {
-                                addedTime = Convert.ToInt16(stringTime);
-                                if (addedTime < 1)
+                                Console.Write("Please input your license plate: ");
+                                lPlate = Console.ReadLine();
+                                Console.Write("Please input how many hours you want to add: ");
+                                string stringTime = Console.ReadLine();
+                                int addedTime = 0;
+                                try
                                 {
-                                    throw new FormatException("Only positive numbers allowed!");
+                                    addedTime = Convert.ToInt16(stringTime);
+                                    if (addedTime < 1)
+                                    {
+                                        throw new FormatException("Only positive numbers allowed!");
+                                    }
+                                    myPark.AddParkTime(lPlate, addedTime);
+                                    break;
                                 }
-                                myPark.AddParkTime(lPlate, addedTime);
-                                break;
+                                catch (NullReferenceException)
+                                {
+                                    Console.WriteLine("It doesn't appear that the license plate exists in our system.");
+                                }
+                                catch (FormatException ex)
+                                {
+                                    Console.WriteLine("Please only input a number!");
+                                    Console.WriteLine(ex.Message);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine("You broke the program ...");
+                                    Console.WriteLine(ex.Message);
+                                    Console.WriteLine(ex);
+                                }
+                                subMenuKey = MenuExit();
                             }
-                            catch (NullReferenceException)
-                            {
-                                Console.WriteLine("It doesn't appear that the license plate exists in our system.");
-                            }
-                            catch (FormatException ex)
-                            {
-                                Console.WriteLine("Please only input a number!");
-                                Console.WriteLine(ex.Message);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine("You broke the program ...");
-                                Console.WriteLine(ex.Message);
-                                Console.WriteLine(ex);
-                            }
-                            subMenuKey = MenuExit();
+                            while (subMenuKey.Key != ConsoleKey.X);
                         }
-                        while (subMenuKey.Key != ConsoleKey.X);
+                        if (isAdmin)
+                        {
+                            Console.WriteLine("You're admin now boy!");
+                        }
+                        MenuWait();
                         
                         break;
                     case ConsoleKey.R:
@@ -148,6 +155,39 @@ namespace WashWorldParking
             Console.WriteLine("║                          ║");
             Console.WriteLine("║      [X] Exit            ║");
             Console.WriteLine("╚══════════════════════════╝");
+        }
+
+        static bool AdminMenu()
+        {
+            Console.Clear();
+            Console.WriteLine(@"8888888888888888888888888888888888888888888888888888888888888");
+            Console.WriteLine(@"8888888888888888888888888888888888888888888888888888888888888");
+            Console.WriteLine(@"8888888888888888888888888P""""  """"98888888888888888888888888888");
+            Console.WriteLine(@"8888888888888888P""88888P          988888""98888888888888888888");
+            Console.WriteLine(@"8888888888888888  ""9888            888P""  8888888888888888888");
+            Console.WriteLine(@"888888888888888888bo ""9  d8o  o8b  P"" od888888888888888888888");
+            Console.WriteLine(@"888888888888888888888bob 98""  ""8P dod888888888888888888888888");
+            Console.WriteLine(@"888888888888888888888888    db    888888888888888888888888888");
+            Console.WriteLine(@"88888888888888888888888888      88888888888888888888888888888");
+            Console.WriteLine(@"88888888888888888888888P""9bo  odP""988888888888888888888888888");
+            Console.WriteLine(@"88888888888888888888P"" od88888888bo ""988888888888888888888888");
+            Console.WriteLine(@"888888888888888888   d88888888888888b   888888888888888888888");
+            Console.WriteLine(@"8888888888888888888oo8888888888888888oo8888888888888888888888");
+            Console.WriteLine(@"8888888888888888888888888888888888888888888888888888888888888");
+            Console.WriteLine("╔═══════════════════════════════════════════════════════════╗");
+            Console.WriteLine("║             WELCOME TO THE SECRET ADMIN MODE!             ║");
+            Console.WriteLine("╠═══════════════════════════════════════════════════════════╣");
+            Console.WriteLine("║                      Please select:                       ║");
+            Console.WriteLine("║     _.........._                         _.........._     ║");
+            Console.WriteLine("║    | |  DOOM  | |    [I]nspect          | |  DOOM  | |    ║");
+            Console.WriteLine("║    | | DISK 1 | |    [D]issect          | | DISK 2 | |    ║");
+            Console.WriteLine("║    | |  OF 4  | |    [K]ill init        | |  OF 4  | |    ║");
+            Console.WriteLine("║    | |________| |    [F]ind user        | |________| |    ║");
+            Console.WriteLine("║    |   ______   |    [A]ll information  |   ______   |    ║");
+            Console.WriteLine("║    |  |    | |  |                       |  |    | |  |    ║");
+            Console.WriteLine("║    |__|____|_|__|    [X] Exit           |__|____|_|__|    ║");
+            Console.WriteLine("╚═══════════════════════════════════════════════════════════╝");
+            return true;
         }
 
         static void MenuWait()

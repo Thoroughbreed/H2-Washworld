@@ -60,7 +60,7 @@ namespace WashWorldParking.BLL
                     searchType.Occupied = true;
                     break;
                 default:
-                    break;
+                    return 1;
             }
             return 0;
         }
