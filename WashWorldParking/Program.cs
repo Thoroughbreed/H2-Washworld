@@ -66,10 +66,35 @@ namespace WashWorldParking
                         lPlate = Console.ReadLine();
                         myPark.ParkCar(pType, lPlate);
                         Console.Clear();
-                        Console.WriteLine("Parking started. The time is now: {0}", DateTime.Now.ToLongDateString());
+                        Console.WriteLine("Parking started. The time is now: {0}", DateTime.Now.ToString());
+                        Console.WriteLine("Minimum parking time is two (2) hours.\nYour parking will expire at: {0}", DateTime.Now.AddHours(2).ToString());
                         MenuWait();
                         break;
                     case ConsoleKey.A:
+                        Console.Write("Please input your license plate: ");
+                        lPlate = Console.ReadLine();
+                        Console.Write("Please input how many hours you want to add: ");
+                        string stringTime = Console.ReadLine();
+                        int addedTime = 0;
+                        try
+                        {
+                            addedTime = Convert.ToInt16(stringTime);
+                            if (addedTime < 1)
+                            {
+                                throw new FormatException("Only positive numbers allowed!");
+                            }
+                        }
+                        catch (FormatException ex)
+                        {
+                            Console.WriteLine("Please only input a number!");
+                            Console.WriteLine(ex.Message);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("You broke the program ...");
+                            Console.WriteLine(ex.Message);
+                        }
+                        myPark.AddParkTime(lPlate, addedTime);
                         MenuWait();
                         break;
                     case ConsoleKey.R:
