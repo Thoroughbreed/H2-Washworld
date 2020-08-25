@@ -89,11 +89,30 @@ namespace WashWorldParking.BLL
         public decimal RevokeTicket(string lPlate)
         { 
             searchType = Parkings.Find(s => s.LicensePlate == lPlate);
-            double diff = Math.Ceiling((DateTime.Now - DateTime.Parse(searchType.ExpirationTime)).TotalHours);
-            Console.WriteLine("Remaining parktime: " + diff);
-            decimal _ = searchType.CalculateFee();
+            double diff = Math.Floor((DateTime.Parse(searchType.ExpirationTime) - DateTime.Now).TotalHours);
+            if (diff > 1)
+            {
+                Console.WriteLine("Remaining parktime: " + diff);
+                Console.Write("How many hours to you like to revoke: ");
+                string revokeAmount = Console.ReadLine();
+                try
+                {
+                    AddParkTime(lPlate, Convert.ToInt16(("-" + revokeAmount)));
+                }
+                catch (FormatException ex)
+                {
+                    Console.WriteLine("Please only input a number!");
+                    Console.WriteLine(ex.Message);
+                }
+            }
+            else if (diff < 1)
+            {
+                Console.WriteLine("You cannot revoke parktime. You doesn't have any remaining hours.");
+                return 0;
+            }
+
             if (searchType == null) throw new NullReferenceException("License plate doesn't exist");
-            return _;
+            return 1;
         }
 
         public decimal CheckoutParking(string lPlate)
