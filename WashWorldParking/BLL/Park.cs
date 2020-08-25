@@ -20,33 +20,40 @@ namespace WashWorldParking.BLL
             HardCode();
         }
 
-        public bool ParkCar(ConsoleKeyInfo input, string lPlate)
+        /// <summary>
+        /// Parkerer en bil
+        /// </summary>
+        /// <param name="input">Keypress</param>
+        /// <param name="lPlate">Nummerplade</param>
+        /// <returns>INT (0: OK - 1: Occupied - 2: lPlate exists!)</returns>
+        public int ParkCar(ConsoleKeyInfo input, string lPlate)
         {
+            if (CheckLicenseplate(lPlate)) return 2;
             switch (input.Key)
             {
                 case ConsoleKey.D1:
-                    if (CheckAvailability(1)) return true;
+                    if (CheckAvailability(1)) return 1;
                     searchType = Parkings.Find(s => s.Occupied == false && s.BoxSize == 1);
                     searchType.ParkTime = DateTime.Now.ToString();
                     searchType.LicensePlate = lPlate;
                     searchType.Occupied = true;
                     break;
                 case ConsoleKey.D2:
-                    if (CheckAvailability(3)) return true;
+                    if (CheckAvailability(3)) return 1;
                     searchType = Parkings.Find(s => s.Occupied == false && s.BoxSize == 3);
                     searchType.ParkTime = DateTime.Now.ToString();
                     searchType.LicensePlate = lPlate;
                     searchType.Occupied = true;
                     break;
                 case ConsoleKey.D3:
-                    if (CheckAvailability(2)) return true;
+                    if (CheckAvailability(2)) return 1;
                     searchType = Parkings.Find(s => s.Occupied == false && s.BoxSize == 2);
                     searchType.ParkTime = DateTime.Now.ToString();
                     searchType.LicensePlate = lPlate;
                     searchType.Occupied = true;
                     break;
                 case ConsoleKey.D4:
-                    if (CheckAvailability(4)) return true;
+                    if (CheckAvailability(4)) return 1;
                     searchType = Parkings.Find(s => s.Occupied == false && s.BoxSize == 4);
                     searchType.ParkTime = DateTime.Now.ToString();
                     searchType.LicensePlate = lPlate;
@@ -55,9 +62,21 @@ namespace WashWorldParking.BLL
                 default:
                     break;
             }
-            return false;
+            return 0;
         }
 
+        private bool CheckLicenseplate(string lPlate)
+        {
+            searchType = Parkings.Find(s => s.LicensePlate == lPlate);
+            if (searchType == null) return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Ser om en given p-type er ledig
+        /// </summary>
+        /// <param name="box">INT/Type</param>
+        /// <returns>Boolean om der er optaget</returns>
         private bool CheckAvailability(int box)
         {
             int i = 0;
@@ -69,6 +88,12 @@ namespace WashWorldParking.BLL
             return false;
         }
 
+        /// <summary>
+        /// Tilføjer ekstra tid til sin parkering
+        /// </summary>
+        /// <param name="lPlate">Nummerplade</param>
+        /// <param name="hours">INT/Tid i hele timer</param>
+        /// <returns></returns>
         public string AddParkTime(string lPlate, int hours)
         {
             string result;
@@ -85,6 +110,9 @@ namespace WashWorldParking.BLL
             return null;
         }
 
+        /// <summary>
+        /// Hardcoded parkings TODO delete when file is filed
+        /// </summary>
         private void HardCode()
         {
             int i = 1;
@@ -109,6 +137,5 @@ namespace WashWorldParking.BLL
                 i++;
             }
         }
-
     }
 }

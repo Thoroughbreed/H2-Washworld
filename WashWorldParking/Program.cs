@@ -8,6 +8,9 @@ namespace WashWorldParking
     {
         static void Main(string[] args)
         {
+            Console.Clear();
+            Console.WriteLine(args[0]);
+
             ConsoleKeyInfo menuKey;
             ConsoleKeyInfo subMenuKey;
             string lPlate;
@@ -54,7 +57,7 @@ namespace WashWorldParking
                         Console.WriteLine("WOSH");
                         MenuWait();
                         break;
-                    case ConsoleKey.P:
+                    case ConsoleKey.P:                                          // Parker bil - kontrollerer om nummerpladen allerede er parkeret
                         Console.WriteLine("Please input your vehicle type:");
                         Console.WriteLine("1 - Car");
                         Console.WriteLine("2 - Car - Handicap parking viable");
@@ -65,10 +68,9 @@ namespace WashWorldParking
                         Console.WriteLine();
                         Console.Write("Please input your license plate: ");
                         lPlate = Console.ReadLine();
-                        if (myPark.ParkCar(pType, lPlate))
-                        {
-                            Console.WriteLine("Unfortunately we don't have any free parking spaces for your automobile type.\nPlease try again later.");
-                        }
+                        int result = myPark.ParkCar(pType, lPlate);
+                        if (result == 1) Console.WriteLine("Unfortunately we don't have any free parking spaces for your automobile type.\nPlease try again later.");
+                        else if (result == 2) Console.WriteLine("License plate already parked!");
                         else
                         {
                             Console.Clear();
@@ -95,6 +97,10 @@ namespace WashWorldParking
                                 myPark.AddParkTime(lPlate, addedTime);
                                 break;
                             }
+                            catch (NullReferenceException)
+                            {
+                                Console.WriteLine("It doesn't appear that the license plate exists in our system.");
+                            }
                             catch (FormatException ex)
                             {
                                 Console.WriteLine("Please only input a number!");
@@ -104,6 +110,7 @@ namespace WashWorldParking
                             {
                                 Console.WriteLine("You broke the program ...");
                                 Console.WriteLine(ex.Message);
+                                Console.WriteLine(ex);
                             }
                             subMenuKey = MenuExit();
                         }
@@ -135,9 +142,9 @@ namespace WashWorldParking
             Console.WriteLine("║      [H]eureka!          ║");
             Console.WriteLine("║                          ║");
             Console.WriteLine("║      [P]ark              ║");
-            Console.WriteLine("║      [A]add time         ║");
+            Console.WriteLine("║      [A]dd time          ║");
             Console.WriteLine("║      [R]evoke ticket     ║");
-            Console.WriteLine("║      [C]ancel parking    ║");
+            Console.WriteLine("║      [C]heckout parking  ║");
             Console.WriteLine("║                          ║");
             Console.WriteLine("║      [X] Exit            ║");
             Console.WriteLine("╚══════════════════════════╝");
