@@ -35,6 +35,7 @@ namespace WashWorldParking.BLL
                     if (CheckAvailability(1)) return 1;
                     searchType = Parkings.Find(s => s.Occupied == false && s.BoxSize == 1);
                     searchType.ParkTime = DateTime.Now.ToString();
+                    searchType.ExpirationTime = DateTime.Now.AddHours(2).ToString();
                     searchType.LicensePlate = lPlate;
                     searchType.Occupied = true;
                     break;
@@ -42,6 +43,7 @@ namespace WashWorldParking.BLL
                     if (CheckAvailability(3)) return 1;
                     searchType = Parkings.Find(s => s.Occupied == false && s.BoxSize == 3);
                     searchType.ParkTime = DateTime.Now.ToString();
+                    searchType.ExpirationTime = DateTime.Now.AddHours(2).ToString();
                     searchType.LicensePlate = lPlate;
                     searchType.Occupied = true;
                     break;
@@ -49,6 +51,7 @@ namespace WashWorldParking.BLL
                     if (CheckAvailability(2)) return 1;
                     searchType = Parkings.Find(s => s.Occupied == false && s.BoxSize == 2);
                     searchType.ParkTime = DateTime.Now.ToString();
+                    searchType.ExpirationTime = DateTime.Now.AddHours(2).ToString();
                     searchType.LicensePlate = lPlate;
                     searchType.Occupied = true;
                     break;
@@ -56,6 +59,7 @@ namespace WashWorldParking.BLL
                     if (CheckAvailability(4)) return 1;
                     searchType = Parkings.Find(s => s.Occupied == false && s.BoxSize == 4);
                     searchType.ParkTime = DateTime.Now.ToString();
+                    searchType.ExpirationTime = DateTime.Now.AddHours(2).ToString();
                     searchType.LicensePlate = lPlate;
                     searchType.Occupied = true;
                     break;
@@ -63,6 +67,41 @@ namespace WashWorldParking.BLL
                     return 1;
             }
             return 0;
+        }
+
+        /// <summary>
+        /// Tilføjer ekstra tid til sin parkering
+        /// </summary>
+        /// <param name="lPlate">Nummerplade</param>
+        /// <param name="hours">INT/Tid i hele timer</param>
+        /// <returns></returns>
+        public string AddParkTime(string lPlate, int hours)
+        {
+            string result;
+            searchType = Parkings.Find(s => s.LicensePlate == lPlate);
+            DateTime oldTime;
+            DateTime.TryParse(searchType.ExpirationTime, out oldTime);
+            searchType.ExpirationTime = oldTime.AddHours(hours).ToString();
+            result = "New expiration time: " + searchType.ExpirationTime.ToString();
+            return result;
+        }
+
+        public decimal RevokeTicket(string lPlate)
+        { 
+            searchType = Parkings.Find(s => s.LicensePlate == lPlate);
+            double diff = Math.Ceiling((DateTime.Now - DateTime.Parse(searchType.ExpirationTime)).TotalHours);
+            Console.WriteLine("Remaining parktime: " + diff);
+            decimal _ = searchType.CalculateFee();
+            if (searchType == null) throw new NullReferenceException("License plate doesn't exist");
+            return _;
+        }
+
+        public decimal CheckoutParking(string lPlate)
+        {
+            searchType = Parkings.Find(s => s.LicensePlate == lPlate);
+            decimal _ = searchType.CalculateFee();
+            if (searchType == null) throw new NullReferenceException("License plate doesn't exist");
+            return _;
         }
 
         private bool CheckLicenseplate(string lPlate)
@@ -86,23 +125,6 @@ namespace WashWorldParking.BLL
             }
             if (i == 0) return true;
             return false;
-        }
-
-        /// <summary>
-        /// Tilføjer ekstra tid til sin parkering
-        /// </summary>
-        /// <param name="lPlate">Nummerplade</param>
-        /// <param name="hours">INT/Tid i hele timer</param>
-        /// <returns></returns>
-        public string AddParkTime(string lPlate, int hours)
-        {
-            string result;
-            searchType = Parkings.Find(s => s.LicensePlate == lPlate);
-            DateTime oldTime;
-            DateTime.TryParse(searchType.ParkTime, out oldTime);
-            searchType.ParkTime = oldTime.AddHours(hours).ToString();
-            result = "New expiration time: " + searchType.ParkTime.ToString();
-            return result;
         }
 
         public List<ParkTypes> GetParkTypes()

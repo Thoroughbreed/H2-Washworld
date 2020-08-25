@@ -11,13 +11,14 @@ namespace WashWorldParking
             ConsoleKeyInfo menuKey;
             ConsoleKeyInfo subMenuKey;
             string lPlate;
+            decimal fee;
             bool isAdmin = false;
 
-        Park myPark = new Park("Parkworld");
+            Park myPark = new Park("Parkworld");
             Wash myWash = new Wash("Waterworld");
             do
             {
-                if (args[0] == "-admin") isAdmin = AdminMenu();
+                if (args.Length >   0 && args[0] == "-admin") isAdmin = AdminMenu();
                 else Menu(myPark.ParkName, myWash.WashName);
                 menuKey = Console.ReadKey(true);
                 switch (menuKey.Key)
@@ -56,7 +57,8 @@ namespace WashWorldParking
                         Console.WriteLine("WOSH");
                         MenuWait();
                         break;
-                    case ConsoleKey.P:                                          // Parker bil - kontrollerer om nummerpladen allerede er parkeret
+                    #region Parker bil - kontrollerer om nummerpladen allerede er parkeret
+                    case ConsoleKey.P:
                         Console.WriteLine("Please input your vehicle type:");
                         Console.WriteLine("1 - Car");
                         Console.WriteLine("2 - Car - Handicap parking viable");
@@ -78,7 +80,8 @@ namespace WashWorldParking
                         }
                         MenuWait();
                         break;
-                    case ConsoleKey.A:
+                    #endregion
+                    case ConsoleKey.A: // Tilføjer tid til parkering | Viser al info som admin
                         if (!isAdmin)
                         {
                             do
@@ -95,7 +98,7 @@ namespace WashWorldParking
                                     {
                                         throw new FormatException("Only positive numbers allowed!");
                                     }
-                                    myPark.AddParkTime(lPlate, addedTime);
+                                    Console.WriteLine(myPark.AddParkTime(lPlate, addedTime));
                                     break;
                                 }
                                 catch (NullReferenceException)
@@ -119,15 +122,47 @@ namespace WashWorldParking
                         }
                         if (isAdmin)
                         {
-                            Console.WriteLine("You're admin now boy!");
+                            int occ = 0;
+                            foreach (var item in myPark.Parkings)
+                            {
+                                if (item.Occupied)
+                                {
+                                    Console.WriteLine("License plate: " + item.LicensePlate + " | Parked since: " + item.ParkTime + " | Parking type: " + item.FriendlyName);
+                                    occ++;
+                                }
+                            }
+                            Console.WriteLine("Number of occupied spaces: " + occ);
+                            Console.WriteLine("Number of available spaces: " + (myPark.Parkings.Count - occ));
                         }
                         MenuWait();
                         
                         break;
                     case ConsoleKey.R:
+                        Console.Write("Please enter your license plate: ");
+                        lPlate = Console.ReadLine();
+                        try
+                        {
+                            fee = myPark.RevokeTicket(lPlate);
+                            Console.WriteLine(fee);
+                        }
+                        catch (NullReferenceException)
+                        {
+                            Console.WriteLine("It doesn't look like the license plate {0} is parked at the moment.", lPlate);
+                        }
                         MenuWait();
                         break;
                     case ConsoleKey.C:
+                        Console.Write("Please enter your license plate: ");
+                        lPlate = Console.ReadLine();
+                        try
+                        {
+                            fee = myPark.RevokeTicket(lPlate);
+                            Console.WriteLine("Thank you for parking at ParkWorld.\nYour fee is {0:C}, and will be deducted from your creditcard automatically.", fee);
+                        }
+                        catch (NullReferenceException)
+                        {
+                            Console.WriteLine("It doesn't look like the license plate {0} is parked at the moment.", lPlate);
+                        }
                         MenuWait();
                         break;
                     default:
