@@ -9,6 +9,7 @@ namespace WashWorldParking
         static void Main(string[] args)
         {
             ConsoleKeyInfo menuKey;
+            ConsoleKeyInfo subMenuKey;
             string lPlate;
             
             Park myPark = new Park("Parkworld");
@@ -64,38 +65,50 @@ namespace WashWorldParking
                         Console.WriteLine();
                         Console.Write("Please input your license plate: ");
                         lPlate = Console.ReadLine();
-                        myPark.ParkCar(pType, lPlate);
-                        Console.Clear();
-                        Console.WriteLine("Parking started. The time is now: {0}", DateTime.Now.ToString());
-                        Console.WriteLine("Minimum parking time is two (2) hours.\nYour parking will expire at: {0}", DateTime.Now.AddHours(2).ToString());
+                        if (myPark.ParkCar(pType, lPlate))
+                        {
+                            Console.WriteLine("Unfortunately we don't have any free parking spaces for your automobile type.\nPlease try again later.");
+                        }
+                        else
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Parking started. The time is now: {0}", DateTime.Now.ToString());
+                            Console.WriteLine("Minimum parking time is two (2) hours.\nYour parking will expire at: {0}", DateTime.Now.AddHours(2).ToString());
+                        }
                         MenuWait();
                         break;
                     case ConsoleKey.A:
-                        Console.Write("Please input your license plate: ");
-                        lPlate = Console.ReadLine();
-                        Console.Write("Please input how many hours you want to add: ");
-                        string stringTime = Console.ReadLine();
-                        int addedTime = 0;
-                        try
+                        do
                         {
-                            addedTime = Convert.ToInt16(stringTime);
-                            if (addedTime < 1)
+                            Console.Write("Please input your license plate: ");
+                            lPlate = Console.ReadLine();
+                            Console.Write("Please input how many hours you want to add: ");
+                            string stringTime = Console.ReadLine();
+                            int addedTime = 0;
+                            try
                             {
-                                throw new FormatException("Only positive numbers allowed!");
+                                addedTime = Convert.ToInt16(stringTime);
+                                if (addedTime < 1)
+                                {
+                                    throw new FormatException("Only positive numbers allowed!");
+                                }
+                                myPark.AddParkTime(lPlate, addedTime);
+                                break;
                             }
+                            catch (FormatException ex)
+                            {
+                                Console.WriteLine("Please only input a number!");
+                                Console.WriteLine(ex.Message);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine("You broke the program ...");
+                                Console.WriteLine(ex.Message);
+                            }
+                            subMenuKey = MenuExit();
                         }
-                        catch (FormatException ex)
-                        {
-                            Console.WriteLine("Please only input a number!");
-                            Console.WriteLine(ex.Message);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("You broke the program ...");
-                            Console.WriteLine(ex.Message);
-                        }
-                        myPark.AddParkTime(lPlate, addedTime);
-                        MenuWait();
+                        while (subMenuKey.Key != ConsoleKey.X);
+                        
                         break;
                     case ConsoleKey.R:
                         MenuWait();
@@ -134,6 +147,14 @@ namespace WashWorldParking
         {
             Console.WriteLine("Press any key to continue");
             Console.ReadKey(true);
+        }
+
+        static ConsoleKeyInfo MenuExit()
+        {
+            Console.WriteLine("Press any key to try again");
+            Console.WriteLine("Press 'X' to exit");
+            ConsoleKeyInfo _ = Console.ReadKey(true);
+            return _;
         }
     }
 }

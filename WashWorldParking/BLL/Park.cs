@@ -20,38 +20,53 @@ namespace WashWorldParking.BLL
             HardCode();
         }
 
-        public void ParkCar(ConsoleKeyInfo input, string lPlate)
+        public bool ParkCar(ConsoleKeyInfo input, string lPlate)
         {
             switch (input.Key)
             {
                 case ConsoleKey.D1:
+                    if (CheckAvailability(1)) return true;
                     searchType = Parkings.Find(s => s.Occupied == false && s.BoxSize == 1);
                     searchType.ParkTime = DateTime.Now.ToString();
-                    searchType.Occupied = true;
                     searchType.LicensePlate = lPlate;
+                    searchType.Occupied = true;
                     break;
                 case ConsoleKey.D2:
+                    if (CheckAvailability(3)) return true;
                     searchType = Parkings.Find(s => s.Occupied == false && s.BoxSize == 3);
                     searchType.ParkTime = DateTime.Now.ToString();
-                    searchType.Occupied = true;
                     searchType.LicensePlate = lPlate;
+                    searchType.Occupied = true;
                     break;
                 case ConsoleKey.D3:
+                    if (CheckAvailability(2)) return true;
                     searchType = Parkings.Find(s => s.Occupied == false && s.BoxSize == 2);
                     searchType.ParkTime = DateTime.Now.ToString();
-                    searchType.Occupied = true;
                     searchType.LicensePlate = lPlate;
+                    searchType.Occupied = true;
                     break;
                 case ConsoleKey.D4:
+                    if (CheckAvailability(4)) return true;
                     searchType = Parkings.Find(s => s.Occupied == false && s.BoxSize == 4);
                     searchType.ParkTime = DateTime.Now.ToString();
-                    searchType.Occupied = true;
                     searchType.LicensePlate = lPlate;
+                    searchType.Occupied = true;
                     break;
-
                 default:
                     break;
             }
+            return false;
+        }
+
+        private bool CheckAvailability(int box)
+        {
+            int i = 0;
+            foreach (var item in Parkings.FindAll(s => s.BoxSize == box))
+            {
+                if (!item.Occupied) i++ ;
+            }
+            if (i == 0) return true;
+            return false;
         }
 
         public string AddParkTime(string lPlate, int hours)
