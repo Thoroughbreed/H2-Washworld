@@ -178,5 +178,8 @@ namespace WashWorldParking.BLL
                 i++;
             }
         }
+
+        private void ParkLoader()
+        { }
     }
 }

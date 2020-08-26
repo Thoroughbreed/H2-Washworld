@@ -32,6 +32,7 @@ namespace WashWorldParking
                         }
                         Console.WriteLine("Failed. Please input license plate manually:");
                           lPlate = Console.ReadLine();
+                        Convert.ToInt16(lPlate);
                         Console.Clear();
                         Console.WriteLine(myWash.WashCar(lPlate));
                         MenuWait();
@@ -156,7 +157,7 @@ namespace WashWorldParking
                         lPlate = Console.ReadLine();
                         try
                         {
-                            fee = myPark.RevokeTicket(lPlate);
+                            fee = myPark.CheckoutParking(lPlate);
                             Console.WriteLine("Thank you for parking at ParkWorld.\nYour fee is {0:C}, and will be deducted from your creditcard automatically.", fee);
                         }
                         catch (NullReferenceException)

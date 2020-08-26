@@ -29,7 +29,7 @@ namespace WashWorldParking.MDL
 
         public override decimal CalculateFee()
         {
-            var val = Math.Ceiling((DateTime.Parse(ExpirationTime) - DateTime.Parse(ParkTime)).TotalHours);
+            double val = Math.Ceiling((DateTime.Parse(ExpirationTime) - DateTime.Parse(ParkTime)).TotalHours);
             if (val < 2) val = 2;
             return (Price * Convert.ToDecimal(val));
         }
