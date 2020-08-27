@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WashWorldParking.MDL;
 using WashWorldParking.REPO;
+using WashWorldParking.UTIL;
 
 namespace WashWorldParking.BLL
 { 
@@ -17,7 +18,7 @@ namespace WashWorldParking.BLL
         public Wash(string name)
         {
             WashName = name;
-        //    Task loadW = Task.Factory.StartNew(() => DoWait());
+        //    Task loadW = Task.Factory.StartNew(() => DoWait()); TODO slettes ved lejlighed
             Task loadW = Task.Factory.StartNew(() => BeginWashThingy());
             Console.SetCursorPosition(0, 1);
             Console.WriteLine("Loading washingmachine - please wait");
@@ -36,9 +37,11 @@ namespace WashWorldParking.BLL
             {
                 Washes.Add(new WashTypes(i+1));
             }
+            Members = FileLogger.ReadFromWash();
+            Thread.Sleep(750); 
         }
 
-        private void DoWait()
+        private void DoWait() // TODO slettes ved lejlighed
         {
             Thread.Sleep(5500);
         }
@@ -50,16 +53,16 @@ namespace WashWorldParking.BLL
             {
                 if (item.Busy)
                 {
-                    result += ("Wash ID: {0} | The wash is busy\n", item.WashID);
+                    result += $"Wash ID: {item.WashID} | The wash is busy\n";
                 }
-                result += ("Wash ID: {0} | The wash is available\n", item.WashID);
+                result += $"Wash ID: {item.WashID} | The wash is available\n";
             }
             return result;
         }
 
         public string WashCar(string lPLate)
         {
-            return "Welcome to my cadaver, your license plate is: " + lPLate;
+            return GetWashTypes();
         }
 
         public bool CreateAccount(string lPlate, string cCard, string eMail, int wType)
@@ -67,7 +70,7 @@ namespace WashWorldParking.BLL
             bool result = false;
             try
             {
-                if (CheckLicenseplate(lPlate)) throw new ArithmeticException("It looks like you already subscribed!");
+                if (CheckLicenseplate(lPlate)) throw new LPlateSubscribed();
                 Members.Add(new WashMembers(lPlate, cCard, eMail, wType));
                 result = true;
             }

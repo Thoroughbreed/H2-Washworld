@@ -29,9 +29,14 @@ namespace WashWorldParking.UTIL
             File.WriteAllTextAsync(parkName, writeMsg);
         }
 
-        public static void SaveWash()
+        public static void SaveWash(List<WashMembers> arg)
         {
-            //TODO gem vaskehallen
+            string writeMsg = "";
+            foreach (var item in arg)
+            {
+                writeMsg += item.LPlate + "" + item.CCard + "" + item.EMail + "" + item.WashType + "\n";
+            }
+            File.WriteAllTextAsync(washName, writeMsg);
         }
 
         public static string ReadFromLog()
@@ -49,20 +54,17 @@ namespace WashWorldParking.UTIL
 
         public static List<ParkTypes> ReadFromPark()
         {
-            string[] fileInfo;
+            string[] parkInfo;
             List<ParkTypes> _ = new List<ParkTypes>();
 
-            DirectoryInfo findLog = new DirectoryInfo(Environment.CurrentDirectory);
-            fileInfo = null;
-            foreach (FileInfo filer in findLog.GetFiles())
+            DirectoryInfo findPark = new DirectoryInfo(Environment.CurrentDirectory);
+            parkInfo = null;
+            foreach (FileInfo park in findPark.GetFiles())
             {
-                if (filer.Extension == ".prk")
-                {
-                    fileInfo = File.ReadAllLines(filer.FullName);
-                }
+                if (park.Extension == ".prk") parkInfo = File.ReadAllLines(park.FullName);
             }
 
-            foreach (string item in fileInfo)
+            foreach (string item in parkInfo)
             {
                 string[] split = item.Split('');
                 if (split[0] == "Carpark")
@@ -83,6 +85,26 @@ namespace WashWorldParking.UTIL
                 }
             }
             return _;
+        }
+
+        public static List<WashMembers> ReadFromWash()
+        {
+            string[] washInfo;
+            List<WashMembers> __ = new List<WashMembers>();
+
+            DirectoryInfo findWash = new DirectoryInfo(Environment.CurrentDirectory);
+            washInfo = null;
+            foreach (FileInfo wash in findWash.GetFiles())
+            {
+                if (wash.Extension == ".wsh") washInfo = File.ReadAllLines(wash.FullName);
+            }
+
+            foreach (string item in washInfo)
+            {
+                string[] split = item.Split('');
+                __.Add(new WashMembers(split[0], split[1], split[2], Convert.ToInt16(split[3])));
+            }
+            return __;
         }
     }
 }

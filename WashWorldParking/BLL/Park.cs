@@ -113,7 +113,7 @@ namespace WashWorldParking.BLL
                     }
                     else if (_ < 1)
                     {
-                        throw new Exception("It looks like you tried to cheat the system! Bad user ... bad!");
+                        throw new BadUser();
                     }
                     Console.WriteLine("You've successfully revoked {0} hours. Your new expiration time is: {1}", revokeAmount, searchType.ExpirationTime);
                 }
@@ -128,14 +128,14 @@ namespace WashWorldParking.BLL
                 Console.WriteLine("You cannot revoke parktime. You doesn't have any remaining hours.");
             }
 
-            if (searchType == null) throw new NullReferenceException("License plate doesn't exist");
+            if (searchType == null) throw new NullReferenceException();
         }
 
         public decimal CheckoutParking(string lPlate)
         {
             searchType = Parkings.Find(s => s.LicensePlate == lPlate);
             decimal _ = searchType.CalculateFee();
-            if (searchType == null) throw new NullReferenceException("License plate doesn't exist");
+            if (searchType == null) throw new NullReferenceException();
             return _;
         }
 

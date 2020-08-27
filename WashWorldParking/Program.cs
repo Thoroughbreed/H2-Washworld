@@ -85,7 +85,7 @@ namespace WashWorldParking
                             int wType = Convert.ToInt16(selection);
                             if (wType > 3)
                             {
-                                throw new ArgumentException();
+                                throw new OutOfRange();
                             }
                             Console.Clear();
                             bool check = myWash.CreateAccount(lPlate, cCard, eMail, wType);
@@ -95,17 +95,10 @@ namespace WashWorldParking
                         {
                             Console.WriteLine("Whoopsie, it looks like you tried to\ninput something that isn't a number.");
                         }
-                        catch (ArgumentException)
+                        catch (Exception ex)
                         {
-                            Console.WriteLine("Hey, please only select 1, 2 or 3!");
-                        }
-                        catch (ArithmeticException ex)
-                        {
+                            Console.WriteLine("Something happened");
                             Console.WriteLine(ex.Message);
-                        }
-                        catch (Exception)
-                        {
-                            Console.WriteLine("BOOM!");
                         }
                         MenuWait();
                         break;
@@ -190,12 +183,18 @@ namespace WashWorldParking
                             {
                                 if (item.Occupied)
                                 {
-                                    Console.WriteLine("License plate: " + item.LicensePlate + " | Parked since: " + item.ParkTime + " | Parking type: " + item.FriendlyName);
+                                    Console.WriteLine("License plate: {0} | Parked since: {1} | Parking type: {2}", item.LicensePlate, item.ParkTime, item.FriendlyName);
                                     occ++;
                                 }
                             }
                             Console.WriteLine("Number of occupied spaces: " + occ);
                             Console.WriteLine("Number of available spaces: " + (myPark.Parkings.Count - occ));
+                            Console.WriteLine();
+                            foreach (var item in myWash.Members)
+                            {
+                                Console.WriteLine("License plate: {0} | Type of subscription: {1}", item.LPlate, item.WashName);
+                            }
+                            Console.WriteLine("Total number of subscribers: " + myWash.Members.Count);
                         }
                         MenuWait();
                         
@@ -244,10 +243,15 @@ namespace WashWorldParking
                 #endregion
                 }
             } while (menuKey.Key != ConsoleKey.X);
-            var close = Task.Factory.StartNew (() => FileLogger.SavePark(myPark.Parkings));
-            Console.WriteLine("Saving");
-            close.Wait();
-            Console.WriteLine("Saving completed!");
+            var closeP = Task.Factory.StartNew (() => FileLogger.SavePark(myPark.Parkings));
+            var closeW = Task.Factory.StartNew(() => FileLogger.SaveWash(myWash.Members));
+            Console.WriteLine("Saving park and wash");
+            closeP.Wait();
+            Console.WriteLine("Saving park completed!");
+            closeW.Wait();
+            Console.WriteLine("Saving wash completed!");
+            Console.WriteLine();
+            Console.WriteLine("K thx bai!");
         }
 
         static void Menu(string pname, string wname)
