@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using WashWorldParking.BLL;
+using WashWorldParking.MDL;
 using WashWorldParking.UTIL;
 
 namespace WashWorldParking
@@ -56,6 +57,7 @@ namespace WashWorldParking
                         MenuWait();
                         break;
                     case ConsoleKey.O:
+                        #region Open account
                         Console.WriteLine("Please fill out this form:");
                         Console.WriteLine();
                         Console.Write("Please input license plate: ");
@@ -102,10 +104,78 @@ namespace WashWorldParking
                         }
                         MenuWait();
                         break;
+                    #endregion
                     case ConsoleKey.S:
-                        Console.WriteLine("WOS");
+                        #region See account
+                        WashMembers x = null;
+                        Console.Write("Please input your license plate: ");
+                        lPlate = Console.ReadLine();
+                        if (!myWash.CheckLicenseplate(lPlate))
+                        {
+                            Console.WriteLine("I'm sorry Dave. I cannot let you do that ...");
+                            MenuWait();
+                            break;
+                        }
+                        foreach (var item in myWash.Members)
+                        {
+                            if (item.LPlate == lPlate)
+                            {
+                                x = item;
+                                Console.WriteLine("Welcome " + item.LPlate);
+                                Console.WriteLine("You are currently subscribed to: " + item.WashName);
+                                break;
+                            }
+                        }
+                        Console.WriteLine("Do you want to change subscription? [Y/N]");
+                        ConsoleKeyInfo answer = Console.ReadKey(true);
+                        switch (answer.Key)
+                        {
+                            case ConsoleKey.Y:
+                                Console.WriteLine("Choose one of the following:");
+                                Console.WriteLine("[1] - Bronze wash");
+                                Console.WriteLine("[2] - Silver wash");
+                                Console.WriteLine("[3] - Gold wash");
+                                Console.WriteLine("[C] - Cancel subscription");
+                                ConsoleKeyInfo a2 = Console.ReadKey(true);
+                                switch (a2.Key)
+                                {
+                                    case ConsoleKey.D1:
+                                        x.WashType = 1;
+                                        x.WashName = "Bronze wash";
+                                        Console.WriteLine("You canged to " + x.WashName);
+                                        break;
+                                    case ConsoleKey.D2:
+                                        x.WashType = 2;
+                                        x.WashName = "Silver wash";
+                                        Console.WriteLine("You canged to " + x.WashName);
+                                        break;
+                                    case ConsoleKey.D3:
+                                        x.WashType = 3;
+                                        x.WashName = "Golden shower";
+                                        Console.WriteLine("You canged to " + x.WashName);
+                                        break;
+                                    case ConsoleKey.C:
+                                        Console.WriteLine("Are you sure you want to cancel subscription? [Y/N]");
+                                        if (Console.ReadKey(true).Key == ConsoleKey.Y)
+                                        {
+                                            myWash.Members.Remove(x);
+                                            Console.WriteLine("K thx bai!");
+                                        }
+                                        else Console.WriteLine("Phew! You're still here then!");
+                                        break;
+                                }
+                                break;
+                            case ConsoleKey.N:
+                                break;
+                            default:
+                                Console.WriteLine("You did something wrong.");
+                                MenuWait();
+                                break;
+                        }
+
                         MenuWait();
                         break;
+                        #endregion
                     case ConsoleKey.H:
                         Console.WriteLine("WOSH");
                         MenuWait();

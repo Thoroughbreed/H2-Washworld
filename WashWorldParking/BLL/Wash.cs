@@ -18,7 +18,6 @@ namespace WashWorldParking.BLL
         public Wash(string name)
         {
             WashName = name;
-        //    Task loadW = Task.Factory.StartNew(() => DoWait()); TODO slettes ved lejlighed
             Task loadW = Task.Factory.StartNew(() => BeginWashThingy());
             Console.SetCursorPosition(0, 1);
             Console.WriteLine("Loading washingmachine - please wait");
@@ -39,11 +38,6 @@ namespace WashWorldParking.BLL
             }
             Members = FileLogger.ReadFromWash();
             Thread.Sleep(750); 
-        }
-
-        private void DoWait() // TODO slettes ved lejlighed
-        {
-            Thread.Sleep(5500);
         }
 
         public string GetWashTypes()
@@ -82,7 +76,7 @@ namespace WashWorldParking.BLL
             return result;
         }
 
-        private bool CheckLicenseplate(string lPlate)
+        public bool CheckLicenseplate(string lPlate)
         {
             searchType = Members.Find(s => s.LPlate == lPlate);
             if (searchType == null) return false;
