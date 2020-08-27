@@ -15,7 +15,7 @@ namespace WashWorldParking.MDL
             LicensePlate = "";
         }
 
-        public HandiPark(string fn, int bs, decimal pr, bool occ, string pt, string et, int id)
+        public HandiPark(string fn, int bs, decimal pr, bool occ, string pt, string et, int id, string lp)
         {
             FriendlyName = fn;
             BoxSize = bs;
@@ -24,6 +24,7 @@ namespace WashWorldParking.MDL
             ParkTime = pt;
             ExpirationTime = et;
             BoxID = id;
+            LicensePlate = lp;
         }
 
         public override decimal CalculateFee()

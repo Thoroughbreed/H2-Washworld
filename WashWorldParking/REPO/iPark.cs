@@ -7,6 +7,5 @@ namespace WashWorldParking.REPO
     public interface iPark
     {
         public string ParkName { get; }
-        public List<ParkTypes> GetParkTypes();
     }
 }

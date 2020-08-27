@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using WashWorldParking.MDL;
 using WashWorldParking.REPO;
+using WashWorldParking.UTIL;
 
 namespace WashWorldParking.BLL
 {
@@ -9,15 +12,21 @@ namespace WashWorldParking.BLL
     {
         public string ParkName { get; }
         public List<ParkTypes> Parkings { get; set; }
-
         private ParkTypes searchType;
-
 
         public Park(string name)
         {
             ParkName = name;
             Parkings = new List<ParkTypes>();
-            HardCode();
+            //HardCode();
+            Task loadP = Task.Factory.StartNew (() => ParkLoader());
+            Console.SetCursorPosition(0, 0);
+            Console.WriteLine("Loading parkinglot - please wait");
+            while (!loadP.IsCompleted)
+            {
+                Thread.Sleep(250);
+            }
+            Console.WriteLine("Parkinglot loaded.");
         }
 
         /// <summary>
@@ -86,7 +95,7 @@ namespace WashWorldParking.BLL
             return result;
         }
 
-        public decimal RevokeTicket(string lPlate)
+        public void RevokeTicket(string lPlate)
         { 
             searchType = Parkings.Find(s => s.LicensePlate == lPlate);
             double diff = Math.Floor((DateTime.Parse(searchType.ExpirationTime) - DateTime.Now).TotalHours);
@@ -97,7 +106,16 @@ namespace WashWorldParking.BLL
                 string revokeAmount = Console.ReadLine();
                 try
                 {
-                    AddParkTime(lPlate, Convert.ToInt16(("-" + revokeAmount)));
+                    int _ = Convert.ToInt16("-" + revokeAmount);
+                    if (_ > 0)
+                    {
+                        AddParkTime(lPlate, Convert.ToInt16(("-" + revokeAmount)));
+                    }
+                    else if (_ < 1)
+                    {
+                        throw new Exception("It looks like you tried to cheat the system! Bad user ... bad!");
+                    }
+                    Console.WriteLine("You've successfully revoked {0} hours. Your new expiration time is: {1}", revokeAmount, searchType.ExpirationTime);
                 }
                 catch (FormatException ex)
                 {
@@ -105,14 +123,12 @@ namespace WashWorldParking.BLL
                     Console.WriteLine(ex.Message);
                 }
             }
-            else if (diff < 1)
+            else if (diff < 2)
             {
                 Console.WriteLine("You cannot revoke parktime. You doesn't have any remaining hours.");
-                return 0;
             }
 
             if (searchType == null) throw new NullReferenceException("License plate doesn't exist");
-            return 1;
         }
 
         public decimal CheckoutParking(string lPlate)
@@ -146,40 +162,10 @@ namespace WashWorldParking.BLL
             return false;
         }
 
-        public List<ParkTypes> GetParkTypes()
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Hardcoded parkings TODO delete when file is filed
-        /// </summary>
-        private void HardCode()
-        {
-            int i = 1;
-            for (int k = 0; k < 19; k++)
-            {
-                Parkings.Add(new CarPark(i));
-                i++;
-            }
-            for (int k = 0; k < 4; k++)
-            {
-                Parkings.Add(new HandiPark(i));
-                i++;
-            }
-            for (int k = 0; k < 10; k++)
-            {
-                Parkings.Add(new TruckPark(i));
-                i++;
-            }
-            for (int k = 0; k < 3; k++)
-            {
-                Parkings.Add(new BusPark(i));
-                i++;
-            }
-        }
-
         private void ParkLoader()
-        { }
+        {
+            Parkings = FileLogger.ReadFromPark();
+            Thread.Sleep(2500); //Virtuel ventetid på load
+        }
     }
 }
