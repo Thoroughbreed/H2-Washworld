@@ -232,12 +232,16 @@ namespace WashWorldParking
                         #endregion
                     case ConsoleKey.H:
                         Console.WriteLine("Are you sure that you want to emergency halt all the washers?");
-                        //Task.Factory.StartNew(() => HorisontalWash(0, 20));
                         Console.WriteLine("Holla the status!");
                         myWash.StatusText();
-                        myWash.HALT.Cancel();
                         Console.SetCursorPosition(0, 17);
                         MenuWait();
+                        break;
+                    case ConsoleKey.B:
+                        myWash.Worker.RunWorkerAsync();
+                        break;
+                    case ConsoleKey.V:
+                        myWash.Worker.CancelAsync();
                         break;
                 #endregion
 
@@ -372,6 +376,8 @@ namespace WashWorldParking
                 #endregion
                 }
             } while (menuKey.Key != ConsoleKey.X);
+
+            #region Saving and exiting
             var closeP = Task.Factory.StartNew (() => FileLogger.SavePark(myPark.Parkings));
             var closeW = Task.Factory.StartNew(() => FileLogger.SaveWash(myWash.Members));
             Console.WriteLine("Saving park and wash");
@@ -386,6 +392,7 @@ namespace WashWorldParking
             Console.Write(" ");
             Console.SetCursorPosition(0, 20);
             Console.WriteLine("K thx bai!");
+            #endregion
         }
 
         static void Menu(string pname, string wname)
@@ -437,6 +444,5 @@ namespace WashWorldParking
         {
             myWash = new Wash(wName);
         }
-
     }
 }

@@ -8,14 +8,13 @@ using WashWorldParking.REPO;
 using WashWorldParking.UTIL;
 
 namespace WashWorldParking.BLL
-{ 
+{
     public class Wash : iWash
     {
         public string WashName { get; }
         public List<WashMembers> Members;
         public List<WashTypes> Washes;
         private WashMembers searchType;
-        public CancellationTokenSource HALT { get; set; }
         private BackgroundWorker worker;
         public BackgroundWorker Worker { get => worker; set { Worker = value; } }
 
@@ -36,17 +35,22 @@ namespace WashWorldParking.BLL
         {
             Members = new List<WashMembers>();
             Washes = new List<WashTypes>();
-            HALT = new CancellationTokenSource();
-            Worker = new BackgroundWorker() { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
-            //Worker.DoWork += WorkerDoWork;
+            worker = new BackgroundWorker() { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
+            Worker.DoWork += WorkerDoWork;
             //Worker.ProgressChanged += WorkerProgressChanged;
             // TODO Se på backgroundworker ... 
-            for (int i = 0; i < 3; i++) 
+            for (int i = 0; i < 3; i++)
             {
-                Washes.Add(new WashTypes(i+1));
+                Washes.Add(new WashTypes(i + 1));
             }
             Members = FileLogger.ReadFromWash();
-            Thread.Sleep(750); 
+            Thread.Sleep(750);
+        }
+
+        private void WorkerDoWork(object sender, DoWorkEventArgs e)
+        {
+            if (worker.CancellationPending) e.Cancel = true;
+            else { StartWash(3, false); }
         }
 
         public string GetWashTypes()
@@ -104,7 +108,7 @@ namespace WashWorldParking.BLL
             WashTypes find = Washes.Find(s => s.Busy == false);
             if (find == null) throw new NoWash();
             result[0] = find.WashID;
-            result[1] = find.WashNow(type, member, HALT);
+            result[1] = find.WashNow(type, member);
             find.W.Start();
             return result;
         }
@@ -118,7 +122,7 @@ namespace WashWorldParking.BLL
                     Console.SetCursorPosition(30, id.WashID * 2);
                     Console.WriteLine($"[{id.WashID}] The wash is currently busy");
                     Console.SetCursorPosition(30, (id.WashID * 2) + 1);
-                    Console.WriteLine("It is currently: " + id.FriendlyName);
+                    Console.WriteLine("It is currently: " + id.WashStatus);
                 }
                 else
                 {

@@ -19,7 +19,7 @@ namespace WashWorldParking.REPO
             Busy = false;
         }
 
-        public void WashBronze(CancellationToken _)
+        public void WashBronze()
         {
             Busy = true;
 
@@ -32,45 +32,40 @@ namespace WashWorldParking.REPO
             Busy = false;
         }
 
-        public void WashSilver(CancellationToken _)
+        public void WashSilver()
         {
             Busy = true;
 
             FriendlyName = "Silver wash";
-            FriendlyName = "Washing ...            ";
+            WashStatus = "Washing ...            ";
             Thread.Sleep(5000);
-            FriendlyName = "Washing rims ...       ";
+            WashStatus = "Washing rims ...       ";
             Thread.Sleep(2500);
-            FriendlyName = "Washing underside ...  ";
+            WashStatus = "Washing underside ...  ";
             Thread.Sleep(2500);
-            FriendlyName = "Dying ...              ";
+            WashStatus = "Dying ...              ";
             Thread.Sleep(5500);
             WashStatus = "";
             Busy = false;
         }
 
-        public void WashGold(CancellationToken _)
+        public void WashGold()
         {
-            _.ThrowIfCancellationRequested();
             Busy = true;
-            FriendlyName = "Washing ...            ";
-            _.ThrowIfCancellationRequested();
+            FriendlyName = "Golden shower";
+            WashStatus = "Washing ...            ";
             Thread.Sleep(5000);
-            FriendlyName = "Washing rims ...       ";
-            _.ThrowIfCancellationRequested();
+            WashStatus = "Washing rims ...       ";
             Thread.Sleep(2500);
-            FriendlyName = "Washing underside ...  ";
-            _.ThrowIfCancellationRequested();
+            WashStatus = "Washing underside ...  ";
             Thread.Sleep(2500);
-            FriendlyName = "Dying ...              ";
-            _.ThrowIfCancellationRequested();
+            WashStatus = "Dying ...              ";
             Thread.Sleep(4500);
-            FriendlyName = "Polishing ...          ";
-            _.ThrowIfCancellationRequested();
+            WashStatus = "Polishing ...          ";
             Thread.Sleep(10000);
-            FriendlyName = "Extra dry martini!     ";
-            _.ThrowIfCancellationRequested();
+            WashStatus = "Extra dry martini!     ";
             Thread.Sleep(4000);
+            WashStatus = "";
             
             Busy = false;
         }
@@ -84,19 +79,18 @@ namespace WashWorldParking.REPO
             else return 999;
         }
 
-        public decimal WashNow(int type, bool member, CancellationTokenSource HALT)
+        public decimal WashNow(int type, bool member)
         {
-            CancellationToken _ = HALT.Token;
             switch(type)
             { 
                 case 1:
-                    W = new Task(() => WashBronze(_));
+                    W = new Task(() => WashBronze());
                     break;
                 case 2:
-                    W = new Task(() => WashSilver(_));
+                    W = new Task(() => WashSilver());
                     break;
                 case 3:
-                    W = new Task(() => WashGold(_));
+                    W = new Task(() => WashGold());
                     break;
             }
             return GeneratePrice(member, type);
