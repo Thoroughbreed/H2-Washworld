@@ -728,6 +728,20 @@ namespace WashWorldParking.UTIL
             }
         }
 
+        public static void SpinnerBool(int z, int y, bool x)
+        {
+            int i = 0;
+            while (x)
+            {
+                Console.SetCursorPosition(z, y);
+                if (i == 0) { Console.Write("/"); i = 1; }
+                else if (i == 1) { Console.Write("-"); i = 2; }
+                else if (i == 2) { Console.Write("\\"); i = 3; }
+                else if (i == 3) { Console.Write("|"); i = 0; }
+                Thread.Sleep(150);
+            }
+        }
+
         public static bool AdminMenu()
         {
             Console.Clear();

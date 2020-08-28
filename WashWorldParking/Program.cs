@@ -62,10 +62,18 @@ namespace WashWorldParking
                             if (myWash.CheckLicenseplate(lPlate))
                             {
                                 decimal[] _ = new decimal[2];
-                                _ = myWash.StartWash(myWash.GetMemberWashType(lPlate), true);
-                                Console.WriteLine("Please enter washbooth number " + _[0]);
-                                MenuWait();
-                                break;
+                                try
+                                {
+                                    _ = myWash.StartWash(myWash.GetMemberWashType(lPlate), true);
+                                    Console.WriteLine("Please enter washbooth number " + _[0]);
+                                    MenuWait();
+                                    break;
+                                }
+                                catch (NoWash ex)
+                                {
+                                    Console.WriteLine(ex.Message);
+                                    subMenu = MenuExit();
+                                }
                             }
                             else
                             {
@@ -84,6 +92,11 @@ namespace WashWorldParking
                                 catch (FormatException)
                                 {
                                     Console.WriteLine("That wasn't a number, now was it?!");
+                                    subMenu = MenuExit();
+                                }
+                                catch (NoWash ex)
+                                {
+                                    Console.WriteLine(ex.Message);
                                     subMenu = MenuExit();
                                 }
                                 catch (Exception ex)
@@ -219,11 +232,11 @@ namespace WashWorldParking
                         #endregion
                     case ConsoleKey.H:
                         Console.WriteLine("Are you sure that you want to emergency halt all the washers?");
-                        Task W1 = Task.Factory.StartNew(() => ASCII.VerticalWash(30, 0));
-                        Task W2 = Task.Factory.StartNew(() => ASCII.VerticalWash(60, 0));
-                        Task W3 = Task.Factory.StartNew(() => ASCII.VerticalWash(90, 0));
                         //Task.Factory.StartNew(() => HorisontalWash(0, 20));
-                        throw new ApplicationException("BOOM!");
+                        Console.WriteLine("Holla the status!");
+                        myWash.StatusText();
+                        myWash.HALT.Cancel();
+                        Console.SetCursorPosition(0, 17);
                         MenuWait();
                         break;
                 #endregion
@@ -399,6 +412,11 @@ namespace WashWorldParking
         static void MenuWait()
         {
             Console.WriteLine("Press any key to continue");
+            Console.SetCursorPosition(30, 2);
+            for (int i = 0; i < 6; i++)
+            {
+                Console.WriteLine();
+            }
             Console.ReadKey(true);
         }
 

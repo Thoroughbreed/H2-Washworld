@@ -14,6 +14,7 @@ namespace WashWorldParking.BLL
         public List<WashMembers> Members;
         public List<WashTypes> Washes;
         private WashMembers searchType;
+        public CancellationTokenSource HALT { get; set; }
 
         public Wash(string name)
         {
@@ -32,6 +33,7 @@ namespace WashWorldParking.BLL
         {
             Members = new List<WashMembers>();
             Washes = new List<WashTypes>();
+            HALT = new CancellationTokenSource();
             for (int i = 0; i < 3; i++)
             {
                 Washes.Add(new WashTypes(i+1));
@@ -95,8 +97,30 @@ namespace WashWorldParking.BLL
             WashTypes find = Washes.Find(s => s.Busy == false);
             if (find == null) throw new NoWash();
             result[0] = find.WashID;
-            result[1] = find.WashNow(type, member);
+            result[1] = find.WashNow(type, member, HALT);
+            find.W.Start();
             return result;
+        }
+
+        public void StatusText()
+        {
+            foreach (var id in Washes)
+            {
+                if (id.Busy)
+                {
+                    Console.SetCursorPosition(30, id.WashID * 2);
+                    Console.WriteLine($"[{id.WashID}] The wash is currently busy");
+                    Console.SetCursorPosition(30, (id.WashID * 2) + 1);
+                    Console.WriteLine("It is currently: " + id.FriendlyName);
+                }
+                else
+                {
+                    Console.SetCursorPosition(30, id.WashID * 2);
+                    Console.WriteLine($"[{id.WashID}] The wash is available");
+                    Console.SetCursorPosition(30, (id.WashID * 2) + 1);
+                    Console.WriteLine("---- WAITING FOR CAR ----                              ");
+                }
+            }
         }
     }
 }

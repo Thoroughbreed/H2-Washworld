@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using WashWorldParking.BLL;
 
 namespace WashWorldParking.REPO
 {
@@ -7,14 +8,10 @@ namespace WashWorldParking.REPO
     {
         public string FriendlyName { get; set; }
         public decimal Price { get; set; }
-        public bool Wash { get; set; }
-        public bool Dry { get; set; }
-        public bool RimWash { get; set; }
-        public bool Underside { get; set; }
-        public bool Polish { get; set; } // Not the country!
-        public bool ExtraDry { get; set; }
+        public string WashStatus { get; set; }
         public int WashID { get; set; }
         public bool Busy { get; set; }
+        public Task W { get; set; }
 
         public WashTypes(int num)
         {
@@ -22,52 +19,59 @@ namespace WashWorldParking.REPO
             Busy = false;
         }
 
-        public decimal WashBronze(bool member)
+        public void WashBronze(CancellationToken _)
         {
             Busy = true;
 
             FriendlyName = "Bronze wash";
-            Price = GeneratePrice(member, 1);
-            Wash = true;
-            Dry = true;
-            RimWash = false;
-            Underside = false;
-            Polish = false;
-            ExtraDry = false;
-            Thread.Sleep(10000);
+            WashStatus = "Washing ...";
+            Thread.Sleep(5000);
+            WashStatus = "Drying ...";
+            Thread.Sleep(4500);
+            WashStatus = "";
             Busy = false;
-            return Price;
         }
 
-        public void WashSilver(bool member)
+        public void WashSilver(CancellationToken _)
         {
             Busy = true;
 
             FriendlyName = "Silver wash";
-            Price = GeneratePrice(member, 2);
-            Wash = true;
-            Dry = true;
-            RimWash = true;
-            Underside = true;
-            Polish = false;
-            ExtraDry = false;
-            Thread.Sleep(20000);
+            FriendlyName = "Washing ...            ";
+            Thread.Sleep(5000);
+            FriendlyName = "Washing rims ...       ";
+            Thread.Sleep(2500);
+            FriendlyName = "Washing underside ...  ";
+            Thread.Sleep(2500);
+            FriendlyName = "Dying ...              ";
+            Thread.Sleep(5500);
+            WashStatus = "";
             Busy = false;
         }
 
-        public void WashGold(bool member)
+        public void WashGold(CancellationToken _)
         {
+            _.ThrowIfCancellationRequested();
             Busy = true;
-
-            FriendlyName = "Gold wash";
-            Price = GeneratePrice(member, 3);
-            Wash = true;
-            Dry = true;
-            RimWash = true;
-            Underside = true;
-            Polish = true;
-            ExtraDry = true;
-            Thread.Sleep(30000);
+            FriendlyName = "Washing ...            ";
+            _.ThrowIfCancellationRequested();
+            Thread.Sleep(5000);
+            FriendlyName = "Washing rims ...       ";
+            _.ThrowIfCancellationRequested();
+            Thread.Sleep(2500);
+            FriendlyName = "Washing underside ...  ";
+            _.ThrowIfCancellationRequested();
+            Thread.Sleep(2500);
+            FriendlyName = "Dying ...              ";
+            _.ThrowIfCancellationRequested();
+            Thread.Sleep(4500);
+            FriendlyName = "Polishing ...          ";
+            _.ThrowIfCancellationRequested();
+            Thread.Sleep(10000);
+            FriendlyName = "Extra dry martini!     ";
+            _.ThrowIfCancellationRequested();
+            Thread.Sleep(4000);
+            
             Busy = false;
         }
 
@@ -80,18 +84,19 @@ namespace WashWorldParking.REPO
             else return 999;
         }
 
-        public decimal WashNow(int type, bool member)
+        public decimal WashNow(int type, bool member, CancellationTokenSource HALT)
         {
-            switch (type)
-            {
+            CancellationToken _ = HALT.Token;
+            switch(type)
+            { 
                 case 1:
-                    Task.Run(() => WashBronze(member));
+                    W = new Task(() => WashBronze(_));
                     break;
                 case 2:
-                    Task.Run(() => WashSilver(member));
+                    W = new Task(() => WashSilver(_));
                     break;
                 case 3:
-                    Task.Run(() => WashGold(member));
+                    W = new Task(() => WashGold(_));
                     break;
             }
             return GeneratePrice(member, type);
