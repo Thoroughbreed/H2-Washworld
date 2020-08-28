@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using WashWorldParking.MDL;
@@ -15,6 +16,8 @@ namespace WashWorldParking.BLL
         public List<WashTypes> Washes;
         private WashMembers searchType;
         public CancellationTokenSource HALT { get; set; }
+        private BackgroundWorker worker;
+        public BackgroundWorker Worker { get => worker; set { Worker = value; } }
 
         public Wash(string name)
         {
@@ -34,7 +37,11 @@ namespace WashWorldParking.BLL
             Members = new List<WashMembers>();
             Washes = new List<WashTypes>();
             HALT = new CancellationTokenSource();
-            for (int i = 0; i < 3; i++)
+            Worker = new BackgroundWorker() { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
+            //Worker.DoWork += WorkerDoWork;
+            //Worker.ProgressChanged += WorkerProgressChanged;
+            // TODO Se på backgroundworker ... 
+            for (int i = 0; i < 3; i++) 
             {
                 Washes.Add(new WashTypes(i+1));
             }
