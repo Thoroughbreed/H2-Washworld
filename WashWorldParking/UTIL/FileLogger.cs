@@ -27,6 +27,7 @@ namespace WashWorldParking.UTIL
                 writeMsg += item.FriendlyName + "" + item.BoxSize + "" + item.Price + "" + item.Occupied + "" + item.ParkTime + "" + item.ExpirationTime + "" + item.BoxID + "" + item.LicensePlate + "\n";
             }
             File.WriteAllTextAsync(parkName, writeMsg);
+            Thread.Sleep(1500); // Fake save time
         }
 
         public static void SaveWash(List<WashMembers> arg)
@@ -37,6 +38,7 @@ namespace WashWorldParking.UTIL
                 writeMsg += item.LPlate + "" + item.CCard + "" + item.EMail + "" + item.WashType + "\n";
             }
             File.WriteAllTextAsync(washName, writeMsg);
+            Thread.Sleep(2345); // Fake save time
         }
 
         public static string ReadFromLog()

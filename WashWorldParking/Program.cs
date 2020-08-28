@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WashWorldParking.BLL;
 using WashWorldParking.MDL;
+using WashWorldParking.REPO;
 using WashWorldParking.UTIL;
 
 namespace WashWorldParking
@@ -36,13 +37,16 @@ namespace WashWorldParking
             }
             do
             {
-                if (args.Length >   0 && args[0] == "-admin") isAdmin = AdminMenu();
+                if (args.Length > 0 && args[0] == "-admin") isAdmin = ASCII.AdminMenu();
                 else Menu(myPark.ParkName, myWash.WashName);
                 menuKey = Console.ReadKey(true);
                 switch (menuKey.Key)
                 {
                 #region Vaskedelen af menuen
                     case ConsoleKey.W:
+                        #region Wash
+                        ConsoleKeyInfo subMenu;
+
                         Console.WriteLine("Trying to read license plate");
                         for (int i = 0; i < 10; i++)
                         {
@@ -50,12 +54,49 @@ namespace WashWorldParking
                             Thread.Sleep(100);
                         }
                         Console.WriteLine();
-                        Console.WriteLine("Failed. Please input license plate manually:");
-                        lPlate = Console.ReadLine();
-                        Console.Clear();
-                        Console.WriteLine(myWash.WashCar(lPlate));
-                        MenuWait();
+                        do
+                        {
+                            Console.WriteLine("Please input license plate manually:");
+                            lPlate = Console.ReadLine();
+                            Console.Clear();
+                            if (myWash.CheckLicenseplate(lPlate))
+                            {
+                                decimal[] _ = new decimal[2];
+                                _ = myWash.StartWash(myWash.GetMemberWashType(lPlate), true);
+                                Console.WriteLine("Please enter washbooth number " + _[0]);
+                                MenuWait();
+                                break;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Please select washtype:");
+                                Console.WriteLine("[1] Bronze\n[2] Silver\n[3] Gold");
+                                try
+                                {
+                                    int washSelect = Convert.ToInt16(Console.ReadLine());
+                                    decimal[] _ = new decimal[2];
+                                    _ = myWash.StartWash(washSelect, false);
+                                    Console.WriteLine("Please enter washbooth number " + _[0]);
+                                    Console.WriteLine("You will be deducted {0:C} from your creditcard", _[1]);
+                                    MenuWait();
+                                    break;
+                                }
+                                catch (FormatException)
+                                {
+                                    Console.WriteLine("That wasn't a number, now was it?!");
+                                    subMenu = MenuExit();
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine("Something happened??");
+                                    Console.WriteLine(ex.Message);
+                                    subMenu = MenuExit();
+                                }
+                            };
+                        }
+                        while(subMenu.Key != ConsoleKey.X);
                         break;
+                    #endregion
                     case ConsoleKey.O:
                         #region Open account
                         Console.WriteLine("Please fill out this form:");
@@ -177,12 +218,17 @@ namespace WashWorldParking
                         break;
                         #endregion
                     case ConsoleKey.H:
-                        Console.WriteLine("WOSH");
+                        Console.WriteLine("Are you sure that you want to emergency halt all the washers?");
+                        Task W1 = Task.Factory.StartNew(() => ASCII.VerticalWash(30, 0));
+                        Task W2 = Task.Factory.StartNew(() => ASCII.VerticalWash(60, 0));
+                        Task W3 = Task.Factory.StartNew(() => ASCII.VerticalWash(90, 0));
+                        //Task.Factory.StartNew(() => HorisontalWash(0, 20));
+                        throw new ApplicationException("BOOM!");
                         MenuWait();
                         break;
                 #endregion
 
-                    #region Parkeringsdelen af menuen
+                #region Parkeringsdelen af menuen
                     #region Parker bil - kontrollerer om nummerpladen allerede er parkeret
                     case ConsoleKey.P:
                         Console.WriteLine("Please input your vehicle type:");
@@ -316,11 +362,16 @@ namespace WashWorldParking
             var closeP = Task.Factory.StartNew (() => FileLogger.SavePark(myPark.Parkings));
             var closeW = Task.Factory.StartNew(() => FileLogger.SaveWash(myWash.Members));
             Console.WriteLine("Saving park and wash");
+            var spinner = Task.Factory.StartNew(() => ASCII.Spinner(21,16));
             closeP.Wait();
+            Console.SetCursorPosition(0, 17);
             Console.WriteLine("Saving park completed!");
             closeW.Wait();
+            Console.SetCursorPosition(0, 18);
             Console.WriteLine("Saving wash completed!");
-            Console.WriteLine();
+            Console.SetCursorPosition(21, 16);
+            Console.Write(" ");
+            Console.SetCursorPosition(0, 20);
             Console.WriteLine("K thx bai!");
         }
 
@@ -343,39 +394,6 @@ namespace WashWorldParking
             Console.WriteLine("║                          ║");
             Console.WriteLine("║      [X] Exit            ║");
             Console.WriteLine("╚══════════════════════════╝");
-        }
-
-        static bool AdminMenu()
-        {
-            Console.Clear();
-            Console.WriteLine(@"8888888888888888888888888888888888888888888888888888888888888");
-            Console.WriteLine(@"8888888888888888888888888888888888888888888888888888888888888");
-            Console.WriteLine(@"8888888888888888888888888P""""  """"98888888888888888888888888888");
-            Console.WriteLine(@"8888888888888888P""88888P          988888""98888888888888888888");
-            Console.WriteLine(@"8888888888888888  ""9888            888P""  8888888888888888888");
-            Console.WriteLine(@"888888888888888888bo ""9  d8o  o8b  P"" od888888888888888888888");
-            Console.WriteLine(@"888888888888888888888bob 98""  ""8P dod888888888888888888888888");
-            Console.WriteLine(@"888888888888888888888888    db    888888888888888888888888888");
-            Console.WriteLine(@"88888888888888888888888888      88888888888888888888888888888");
-            Console.WriteLine(@"88888888888888888888888P""9bo  odP""988888888888888888888888888");
-            Console.WriteLine(@"88888888888888888888P"" od88888888bo ""988888888888888888888888");
-            Console.WriteLine(@"888888888888888888   d88888888888888b   888888888888888888888");
-            Console.WriteLine(@"8888888888888888888oo8888888888888888oo8888888888888888888888");
-            Console.WriteLine(@"8888888888888888888888888888888888888888888888888888888888888");
-            Console.WriteLine("╔═══════════════════════════════════════════════════════════╗");
-            Console.WriteLine("║             WELCOME TO THE SECRET ADMIN MODE!             ║");
-            Console.WriteLine("╠═══════════════════════════════════════════════════════════╣");
-            Console.WriteLine("║                      Please select:                       ║");
-            Console.WriteLine("║     _.........._                         _.........._     ║");
-            Console.WriteLine("║    | |  DOOM  | |    [I]nspect          | |  DOOM  | |    ║");
-            Console.WriteLine("║    | | DISK 1 | |    [D]issect          | | DISK 2 | |    ║");
-            Console.WriteLine("║    | |  OF 4  | |    [K]ill init        | |  OF 4  | |    ║");
-            Console.WriteLine("║    | |________| |    [F]ind user        | |________| |    ║");
-            Console.WriteLine("║    |   ______   |    [A]ll information  |   ______   |    ║");
-            Console.WriteLine("║    |  |    | |  |                       |  |    | |  |    ║");
-            Console.WriteLine("║    |__|____|_|__|    [X] Exit           |__|____|_|__|    ║");
-            Console.WriteLine("╚═══════════════════════════════════════════════════════════╝");
-            return true;
         }
 
         static void MenuWait()
@@ -401,5 +419,6 @@ namespace WashWorldParking
         {
             myWash = new Wash(wName);
         }
+
     }
 }

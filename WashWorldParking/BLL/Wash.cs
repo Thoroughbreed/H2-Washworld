@@ -12,7 +12,7 @@ namespace WashWorldParking.BLL
     {
         public string WashName { get; }
         public List<WashMembers> Members;
-        private List<WashTypes> Washes;
+        public List<WashTypes> Washes;
         private WashMembers searchType;
 
         public Wash(string name)
@@ -42,14 +42,13 @@ namespace WashWorldParking.BLL
 
         public string GetWashTypes()
         {
-            string result = "";
+            string result = "There is no washs available at the moment. 🥺";
             foreach (var item in Washes)
             {
-                if (item.Busy)
+                if (!item.Busy)
                 {
-                    result += $"Wash ID: {item.WashID} | The wash is busy\n";
+                    result += $"[{item.WashID}] Wash ID: {item.WashID} | The wash is available\n";
                 }
-                result += $"Wash ID: {item.WashID} | The wash is available\n";
             }
             return result;
         }
@@ -81,6 +80,23 @@ namespace WashWorldParking.BLL
             searchType = Members.Find(s => s.LPlate == lPlate);
             if (searchType == null) return false;
             return true;
+        }
+
+        public int GetMemberWashType (string lPlate)
+        {
+            searchType = Members.Find(s => s.LPlate == lPlate);
+            return searchType.WashType;
+
+        }
+
+        public decimal[] StartWash(int type, bool member)
+        {
+            decimal[] result = new decimal[2];
+            WashTypes find = Washes.Find(s => s.Busy == false);
+            if (find == null) throw new NoWash();
+            result[0] = find.WashID;
+            result[1] = find.WashNow(type, member);
+            return result;
         }
     }
 }
