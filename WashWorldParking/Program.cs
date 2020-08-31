@@ -64,7 +64,7 @@ namespace WashWorldParking
                                 decimal[] _ = new decimal[2];
                                 try
                                 {
-                                    _ = myWash.StartWash(myWash.GetMemberWashType(lPlate), true);
+        //                            _ = myWash.StartWash(myWash.GetMemberWashType(lPlate), true);
                                     Console.WriteLine("Please enter washbooth number " + _[0]);
                                     MenuWait();
                                     break;
@@ -83,7 +83,7 @@ namespace WashWorldParking
                                 {
                                     int washSelect = Convert.ToInt16(Console.ReadLine());
                                     decimal[] _ = new decimal[2];
-                                    _ = myWash.StartWash(washSelect, false);
+        //                            _ = myWash.StartWash(washSelect, false);
                                     Console.WriteLine("Please enter washbooth number " + _[0]);
                                     Console.WriteLine("You will be deducted {0:C} from your creditcard", _[1]);
                                     MenuWait();
@@ -231,11 +231,27 @@ namespace WashWorldParking
                         break;
                         #endregion
                     case ConsoleKey.H:
+                        var __cts = new CancellationTokenSource();
+                        CancellationToken __cancellation = __cts.Token;
                         Console.WriteLine("Are you sure that you want to emergency halt all the washers?");
-                        Console.WriteLine("Holla the status!");
-                        myWash.StatusText();
+                        Console.WriteLine("[Y]/[N] - any other key to abort from menu.");
+                        Task stat = Task.Run(() =>
+                        {
+                            myWash.StatusText(__cancellation);
+                        }, __cancellation);
+        //                __cts.Cancel();
                         Console.SetCursorPosition(0, 17);
-                        MenuWait();
+                        subMenuKey = Console.ReadKey(true);
+                        if (subMenuKey.Key == ConsoleKey.Y)
+                        {
+                            myWash.Worker.CancelAsync();
+                            __cts.Cancel();
+                        }
+                        else
+                        {
+                            __cts.Cancel();
+                        }
+                        __cts.Dispose();
                         break;
                     case ConsoleKey.B:
                         myWash.Worker.RunWorkerAsync();
@@ -333,6 +349,7 @@ namespace WashWorldParking
                         
                         break;
                     case ConsoleKey.R:
+                        #region Revoke ticket
                         Console.Write("Please enter your license plate: ");
                         lPlate = Console.ReadLine();
                         try
@@ -367,6 +384,7 @@ namespace WashWorldParking
                         }
                         MenuWait();
                         break;
+                    #endregion
                     default:
                         break;
                 #endregion

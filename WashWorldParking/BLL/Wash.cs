@@ -50,7 +50,7 @@ namespace WashWorldParking.BLL
         private void WorkerDoWork(object sender, DoWorkEventArgs e)
         {
             if (worker.CancellationPending) e.Cancel = true;
-            else { StartWash(3, false); }
+            else { StartWash(3, false, e); }
         }
 
         public string GetWashTypes()
@@ -102,36 +102,49 @@ namespace WashWorldParking.BLL
 
         }
 
-        public decimal[] StartWash(int type, bool member)
+        public decimal[] StartWash(int type, bool member, DoWorkEventArgs e)
         {
             decimal[] result = new decimal[2];
             WashTypes find = Washes.Find(s => s.Busy == false);
             if (find == null) throw new NoWash();
             result[0] = find.WashID;
-            result[1] = find.WashNow(type, member);
+            result[1] = find.WashNow(type, member, worker, e);
             find.W.Start();
             return result;
         }
 
-        public void StatusText()
+        public void StatusText(CancellationToken _)
         {
-            foreach (var id in Washes)
+            bool work = true;
+            int key = 1;
+            while (work)
             {
-                if (id.Busy)
-                {
-                    Console.SetCursorPosition(30, id.WashID * 2);
-                    Console.WriteLine($"[{id.WashID}] The wash is currently busy");
-                    Console.SetCursorPosition(30, (id.WashID * 2) + 1);
-                    Console.WriteLine("It is currently: " + id.WashStatus);
-                }
+                if (_.IsCancellationRequested) _.ThrowIfCancellationRequested();
                 else
                 {
-                    Console.SetCursorPosition(30, id.WashID * 2);
-                    Console.WriteLine($"[{id.WashID}] The wash is available");
-                    Console.SetCursorPosition(30, (id.WashID * 2) + 1);
-                    Console.WriteLine("---- WAITING FOR CAR ----                              ");
+                    foreach (var id in Washes)
+                    {
+                        if (id.Busy)
+                        {
+                            Console.SetCursorPosition(30, id.WashID * 2);
+                            Console.WriteLine($"[{id.WashID}] The wash is currently busy");
+                            Console.SetCursorPosition(30, (id.WashID * 2) + 1);
+                            Console.WriteLine("It is currently: " + id.WashStatus);
+                        }
+                        else
+                        {
+                            Console.SetCursorPosition(30, id.WashID * 2);
+                            Console.WriteLine($"[{id.WashID}] The wash is available");
+                            Console.SetCursorPosition(30, (id.WashID * 2) + 1);
+                            Console.WriteLine("---- WAITING FOR CAR ----                              ");
+                        }
+                    }
+
+                    key = ASCII.HorisontalWash(0, 20, key);
                 }
+                Thread.Sleep(250);
             }
+            
         }
     }
 }

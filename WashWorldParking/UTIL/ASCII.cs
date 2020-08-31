@@ -10,80 +10,91 @@ namespace WashWorldParking.UTIL
         public ASCII()
         {
         }
-        public static void HorisontalWash(int x, int y)
+        public static int HorisontalWash(int x, int y, int key)
         {
-            while (1 == 1)
+            if (key > 9) key = 1;
+            if (key == 1)
             {
                 Console.SetCursorPosition(x, y);
                 Console.WriteLine("-. .-.   .-. .-.   .-. .-.   .");
                 Console.WriteLine("||\\|||\\ /|||\\|||\\ /|||\\|||\\ /|");
                 Console.WriteLine("|/ \\|||\\|||/ \\|||\\|||/ \\|||\\||");
                 Console.WriteLine("~   `-~ `-`   `-~ `-`   `-~ `-");
-                Thread.Sleep(150);
-
+            }
+            if (key == 2)
+            {
                 Console.SetCursorPosition(x, y);
                 Console.WriteLine(". .-.   .-. .-.   .-. .-.   .-");
                 Console.WriteLine("|\\|||\\ /|||\\|||\\ /|||\\|||\\ /||");
                 Console.WriteLine("/ \\|||\\|||/ \\|||\\|||/ \\|||\\|||");
                 Console.WriteLine("   `-~ `-`   `-~ `-`   `-~ `-~");
-                Thread.Sleep(150);
-
+            }
+            if (key == 3)
+            {
                 Console.SetCursorPosition(x, y);
                 Console.WriteLine(" .-.   .-. .-.   .-. .-.   .-.");
                 Console.WriteLine("\\|||\\ /|||\\|||\\ /|||\\|||\\ /|||");
                 Console.WriteLine(" \\|||\\|||/ \\|||\\|||/ \\|||\\|||/");
                 Console.WriteLine("  `-~ `-`   `-~ `-`   `-~ `-~ ");
-                Thread.Sleep(150);
-
+            }
+            if (key == 4)
+            {
                 Console.SetCursorPosition(x, y);
                 Console.WriteLine(".-.   .-. .-.   .-. .-.   .-. ");
                 Console.WriteLine("|||\\ /|||\\|||\\ /|||\\|||\\ /|||\\");
                 Console.WriteLine("\\|||\\|||/ \\|||\\|||/ \\|||\\|||/ ");
                 Console.WriteLine(" `-~ `-`   `-~ `-`   `-~ `-~  ");
-                Thread.Sleep(150);
-
+            }
+            if (key == 4)
+            {
                 Console.SetCursorPosition(x, y);
                 Console.WriteLine("-.   .-. .-.   .-. .-.   .-. .");
                 Console.WriteLine("||\\ /|||\\|||\\ /|||\\|||\\ /|||\\|");
                 Console.WriteLine("|||\\|||/ \\|||\\|||/ \\|||\\|||/ \\");
                 Console.WriteLine("`-~ `-`   `-~ `-`   `-~ `-~   ");
-                Thread.Sleep(150);
-
+            }
+            if (key == 5)
+            {
                 Console.SetCursorPosition(x, y);
                 Console.WriteLine(".   .-. .-.   .-. .-.   .-. .-");
                 Console.WriteLine("|\\ /|||\\|||\\ /|||\\|||\\ /|||\\||");
                 Console.WriteLine("||\\|||/ \\|||\\|||/ \\|||\\|||/ \\|");
                 Console.WriteLine("-~ `-`   `-~ `-`   `-~ `-~   `");
-                Thread.Sleep(150);
-
+            }
+            if (key == 6)
+            {
                 Console.SetCursorPosition(x, y);
                 Console.WriteLine("   .-. .-.   .-. .-.   .-. .-.");
                 Console.WriteLine("\\ /|||\\|||\\ /|||\\|||\\ /|||\\|||");
                 Console.WriteLine("|\\|||/ \\|||\\|||/ \\|||\\|||/ \\||");
                 Console.WriteLine("~ `-`   `-~ `-`   `-~ `-~   `-");
-                Thread.Sleep(150);
-
+            }
+            if (key == 7)
+            {
                 Console.SetCursorPosition(x, y);
                 Console.WriteLine("  .-. .-.   .-. .-.   .-. .-. ");
                 Console.WriteLine(" /|||\\|||\\ /|||\\|||\\ /|||\\|||\\");
                 Console.WriteLine("\\|||/ \\|||\\|||/ \\|||\\|||/ \\|||");
                 Console.WriteLine(" `-`   `-~ `-`   `-~ `-~   `-~");
-                Thread.Sleep(150);
-
+            }
+            if (key == 8)
+            {
                 Console.SetCursorPosition(x, y);
                 Console.WriteLine(" .-. .-.   .-. .-.   .-. .-.  ");
                 Console.WriteLine("/|||\\|||\\ /|||\\|||\\ /|||\\|||\\ ");
                 Console.WriteLine("|||/ \\|||\\|||/ \\|||\\|||/ \\|||\\");
                 Console.WriteLine("`-`   `-~ `-`   `-~ `-~   `-~ ");
-                Thread.Sleep(150);
-
+            }
+            if (key == 9)
+            {
                 Console.SetCursorPosition(x, y);
                 Console.WriteLine(".-. .-.   .-. .-.   .-. .-.   ");
                 Console.WriteLine("|||\\|||\\ /|||\\|||\\ /|||\\|||\\ /");
                 Console.WriteLine("||/ \\|||\\|||/ \\|||\\|||/ \\|||\\|");
                 Console.WriteLine("-`   `-~ `-`   `-~ `-~   `-~ `");
-                Thread.Sleep(150);
             }
+            key++;
+            return key;
         }
 
         public static void VerticalWash(int x, int y)

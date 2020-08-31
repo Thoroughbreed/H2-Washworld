@@ -20,4 +20,9 @@ namespace WashWorldParking.UTIL
     {
         public override string Message { get { return "Unfortunately there's no available washes at the moment.\nPlease come back later."; } }
     }
+
+    public class StopWash : Exception
+    {
+        public override string Message { get { return "Wash is stopped!"; } }
+    }
 }
