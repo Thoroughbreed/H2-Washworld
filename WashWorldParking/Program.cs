@@ -15,10 +15,11 @@ namespace WashWorldParking
         public static Park myPark { get; set; }
         public static Wash myWash { get; set; }
         public static List<Victims> Victims { get; set; }
+        private static ASCII MainMenu;
 
         static void Main(string[] args)
         {
-            ConsoleKeyInfo menuKey;
+            ConsoleKey menuKey;
             ConsoleKeyInfo subMenuKey;
             int q = 0;
             int z = 1;
@@ -45,12 +46,12 @@ namespace WashWorldParking
             {
                 if (args.Length > 0)
                 {
-                    if (args[0] == "-admin")
+                    if ((args[0] == "-admin") || (args[0] == "-iddqd"))
                     {
                         isAdmin = ASCII.AdminMenu();
                         if (init)
                         {
-                            FileLogger.WriteToLog("Application started as -admin"); init = false;
+                            FileLogger.WriteToLog($"Application started as {args[0]}"); init = false;
                             Victims = new List<Victims>();
                             foreach (var item in myWash.Members)
                             {
@@ -65,13 +66,19 @@ namespace WashWorldParking
                     }
                     else
                     {
-                        Menu(myPark.ParkName, myWash.WashName);
+                        MainMenu = new ASCII(new List<string>()
+                           { "Wash car", "Create Account", "See account", "See wash status", "Park car", "Add time", "Revoke ticket", "Checkout parking", "-- EXIT --"});
                         if (init) { FileLogger.WriteToLog($"Application was started with (wrong) parameter ({args[0]})"); init = false; };
                     }
                 }
-                else Menu(myPark.ParkName, myWash.WashName);
-                menuKey = Console.ReadKey(true);
-                switch (menuKey.Key)
+                else
+                {
+                    MainMenu = new ASCII(new List<string>()
+                      { "Wash car", "Create Account", "See account", "See wash status", "Park car", "Add time", "Revoke ticket", "Checkout parking", "-- EXIT --" });
+                }
+                if (!isAdmin) menuKey = MainMenu.Draw();
+                else menuKey = Console.ReadKey(true).Key;
+                switch (menuKey)
                 {
                 #region Vaskedelen af menuen
                     case ConsoleKey.W:
@@ -634,45 +641,31 @@ namespace WashWorldParking
                         #endregion
                         #endregion
                 }
-            } while (menuKey.Key != ConsoleKey.X);
+            } while (menuKey != ConsoleKey.X);
 
-            #region Saving and exiting
-            var closeP = Task.Factory.StartNew (() => FileLogger.SavePark(myPark.Parkings));
-            var closeW = Task.Factory.StartNew(() => FileLogger.SaveWash(myWash.Members));
-            Console.WriteLine("Saving park and wash");
-            var spinner = Task.Factory.StartNew(() => ASCII.Spinner(21,16));
-            closeP.Wait();
-            Console.SetCursorPosition(0, 17);
-            Console.WriteLine("Saving park completed!");
-            closeW.Wait();
-            Console.SetCursorPosition(0, 18);
-            Console.WriteLine("Saving wash completed!");
-            Console.SetCursorPosition(21, 16);
-            Console.Write(" ");
-            Console.SetCursorPosition(0, 20);
-            Console.WriteLine("K thx bai!");
-            #endregion
+            SaveAndExit(isAdmin);
         }
 
-        static void Menu(string pname, string wname)
+        static void SaveAndExit(bool isAdmin)
         {
-            Console.Clear();
-            Console.WriteLine("╔══════════════════════════╗");
-            Console.WriteLine("║  {0} | {1}  ║", wname, pname);
-            Console.WriteLine("╠══════════════════════════╣");
-            Console.WriteLine("║      Please select:      ║");
-            Console.WriteLine("║      [W]ash car          ║");
-            Console.WriteLine("║      [O]pen account      ║");
-            Console.WriteLine("║      [S]ee account       ║");
-            Console.WriteLine("║      [H]eureka!          ║");
-            Console.WriteLine("║                          ║");
-            Console.WriteLine("║      [P]ark              ║");
-            Console.WriteLine("║      [A]dd time          ║");
-            Console.WriteLine("║      [R]evoke ticket     ║");
-            Console.WriteLine("║      [C]heckout parking  ║");
-            Console.WriteLine("║                          ║");
-            Console.WriteLine("║      [X] Exit            ║");
-            Console.WriteLine("╚══════════════════════════╝");
+            int yOffset = 27;
+            int xOffset = 30;
+            if (isAdmin) { yOffset = 22; xOffset = 10; };
+            var closeP = Task.Factory.StartNew(() => FileLogger.SavePark(myPark.Parkings));
+            var closeW = Task.Factory.StartNew(() => FileLogger.SaveWash(myWash.Members));
+            Console.SetCursorPosition(10 + xOffset, 5 + yOffset);
+            Console.WriteLine("Saving park and wash");
+            var spinner = Task.Factory.StartNew(() => ASCII.Spinner(31 + xOffset, 5 + yOffset));
+            closeP.Wait();
+            Console.SetCursorPosition(10 + xOffset, 7 + yOffset);
+            Console.WriteLine("Saving park completed!");
+            closeW.Wait();
+            Console.SetCursorPosition(10 + xOffset, 8 + yOffset);
+            Console.WriteLine("Saving wash completed!");
+            Console.SetCursorPosition(31 + xOffset, 5 + yOffset);
+            Console.Write(" ");
+            Console.SetCursorPosition(10 + xOffset, 10 + yOffset);
+            Console.WriteLine("K thx bai!");
         }
 
         static void MenuWait()

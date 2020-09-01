@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Threading;
@@ -825,5 +826,123 @@ namespace WashWorldParking.UTIL
             }
         }
         */
+
+        static void Menu(string pname, string wname)
+        {
+            Console.Clear();
+            Console.WriteLine("╔══════════════════════════╗");
+            Console.WriteLine("║  {0} | {1}  ║", wname, pname);
+            Console.WriteLine("╠══════════════════════════╣");
+            Console.WriteLine("║      Please select:      ║");
+            Console.WriteLine("║      [W]ash car          ║");
+            Console.WriteLine("║      [O]pen account      ║");
+            Console.WriteLine("║      [S]ee account       ║");
+            Console.WriteLine("║      [H]eureka!          ║");
+            Console.WriteLine("║                          ║");
+            Console.WriteLine("║      [P]ark              ║");
+            Console.WriteLine("║      [A]dd time          ║");
+            Console.WriteLine("║      [R]evoke ticket     ║");
+            Console.WriteLine("║      [C]heckout parking  ║");
+            Console.WriteLine("║                          ║");
+            Console.WriteLine("║      [X] Exit            ║");
+            Console.WriteLine("╚══════════════════════════╝");
+        }
+
+        public List<string> MenuItems { get; }
+        public event Action<int> IndexChanged;
+
+        private readonly int _screenWidth;
+        private readonly int _screenHeight;
+        private readonly int _offset;
+        private readonly bool _clear;
+
+        public ASCII(List<string> menuItems, int screenWidth = -1, int screenHeight = -1, int offset = 0, bool clear = true)
+        {
+            MenuItems = menuItems;
+            _screenWidth = screenWidth == -1 ? Console.WindowWidth : screenWidth;
+            _screenHeight = screenHeight == -1 ? Console.WindowHeight : screenHeight;
+            _offset = offset;
+            _clear = clear;
+        }
+
+        public ConsoleKey Draw()
+        {
+            if (_clear)
+                Console.Clear();
+
+            Console.CursorVisible = false;
+            int posY = (_screenHeight - MenuItems.Count) / 2;
+            int selectedItemIndex = 0;
+
+            #region Input validation
+            if (posY <= 0)
+                throw new InvalidOperationException("There is not enough space");
+            if (MenuItems.TrueForAll(i => i.Length > _screenWidth - 4))
+                throw new InvalidOperationException("One of the items are longer than the screen width");
+            #endregion
+
+            while (true)
+            {
+                posY = (_screenHeight - MenuItems.Count) / 2;
+                foreach (var item in MenuItems)
+                {
+                    int posX = (_screenWidth - item.Length) / 2 + _offset;
+                    if (MenuItems.IndexOf(item) == selectedItemIndex)
+                    {
+                        Console.SetCursorPosition(posX, posY++);
+                        Console.Write($"[ ");
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write($"{item}");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.Write($" ]");
+                        IndexChanged?.Invoke(selectedItemIndex);
+                    }
+                    else
+                    {
+                        Console.SetCursorPosition(posX, posY++);
+                        Console.WriteLine($"  {item}  ");
+                    }
+                }
+
+                #region Controls
+                ConsoleKey key = Console.ReadKey(true).Key;
+                switch (key)
+                {
+                    case ConsoleKey.UpArrow:
+                        if (selectedItemIndex <= 0)
+                            selectedItemIndex = MenuItems.Count - 1;
+                        else
+                            selectedItemIndex--;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        if (selectedItemIndex >= MenuItems.Count - 1)
+                            selectedItemIndex = 0;
+                        else
+                            selectedItemIndex++;
+                        break;
+                    case ConsoleKey.Escape:
+                        return ConsoleKey.X;
+                    case ConsoleKey.X:
+                        return ConsoleKey.X;
+                    case ConsoleKey.Enter:
+                        Console.CursorVisible = true;
+                        // { "Wash car", "Create Account", "See account", "See wash status", "Park car", "Add time", "Revoke ticket", "Checkout parking", "Exit" });
+                        if (selectedItemIndex == 0) return ConsoleKey.W;
+                        if (selectedItemIndex == 1) return ConsoleKey.O;
+                        if (selectedItemIndex == 2) return ConsoleKey.S;
+                        if (selectedItemIndex == 3) return ConsoleKey.H;
+                        if (selectedItemIndex == 4) return ConsoleKey.P;
+                        if (selectedItemIndex == 5) return ConsoleKey.A;
+                        if (selectedItemIndex == 6) return ConsoleKey.R;
+                        if (selectedItemIndex == 7) return ConsoleKey.C;
+                        if (selectedItemIndex == 8) return ConsoleKey.X;
+                        break;
+
+                       
+
+                }
+                #endregion
+            }
+        }
     }
 }
