@@ -2,21 +2,20 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using WashWorldParking.MDL;
 
 namespace WashWorldParking.UTIL
 {
     static class FileLogger
     {
-        static string fileName = "logs.log";
+        static string logName = "logs.log";
         static string parkName = "file.prk";
         static string washName = "file.wsh";
 
         public static void WriteToLog(string logmessage)
         {
-            string writeMsg = DateTime.Now.ToString() + " " + logmessage + "\n";
-            File.AppendAllTextAsync(fileName, writeMsg);
+            string writeMsg = $"{DateTime.Now} {logmessage} \n";
+            File.AppendAllTextAsync(logName, writeMsg);
         }
 
         public static void SavePark(List<ParkTypes> arg)
@@ -51,7 +50,7 @@ namespace WashWorldParking.UTIL
                     return File.ReadAllText(filer.FullName);
                 }
             }
-            return "Der er ikke fundet nogen log.";
+            return "No log found??!!!";
         }
 
         public static List<ParkTypes> ReadFromPark()
@@ -92,7 +91,7 @@ namespace WashWorldParking.UTIL
         public static List<WashMembers> ReadFromWash()
         {
             string[] washInfo;
-            List<WashMembers> __ = new List<WashMembers>();
+            List<WashMembers> _ = new List<WashMembers>();
 
             DirectoryInfo findWash = new DirectoryInfo(Environment.CurrentDirectory);
             washInfo = null;
@@ -104,9 +103,9 @@ namespace WashWorldParking.UTIL
             foreach (string item in washInfo)
             {
                 string[] split = item.Split('');
-                __.Add(new WashMembers(split[0], split[1], split[2], Convert.ToInt16(split[3])));
+                _.Add(new WashMembers(split[0], split[1], split[2], Convert.ToInt16(split[3])));
             }
-            return __;
+            return _;
         }
     }
 }

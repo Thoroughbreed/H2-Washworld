@@ -12,8 +12,8 @@ namespace WashWorldParking.BLL
     public class Wash : iWash
     {
         public string WashName { get; }
-        public List<WashMembers> Members;
-        public List<WashTypes> Washes;
+        public List<WashMembers> Members { get; set; }
+        public List<WashTypes> Washes { get; set; }
         private WashMembers searchType;
         private BackgroundWorker worker;
         public BackgroundWorker Worker { get => worker; set { Worker = value; } }
@@ -117,7 +117,7 @@ namespace WashWorldParking.BLL
         /// <param name="type">Wasketype</param>
         /// <param name="member">Medlem</param>
         /// <param name="worker">BGW</param>
-        public void StartWash(int type, bool member, BackgroundWorker worker) // TODO exception checking!
+        public void StartWash(int type, bool member, BackgroundWorker worker)
 
         {
             WashTypes find = Washes.Find(s => s.Busy == false);

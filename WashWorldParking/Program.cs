@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WashWorldParking.BLL;
@@ -13,16 +14,19 @@ namespace WashWorldParking
     {
         public static Park myPark { get; set; }
         public static Wash myWash { get; set; }
+        public static List<Victims> Victims { get; set; }
 
         static void Main(string[] args)
         {
             ConsoleKeyInfo menuKey;
             ConsoleKeyInfo subMenuKey;
             int q = 0;
+            int z = 1;
 
             string lPlate;
             decimal fee;
             bool isAdmin = false;
+            bool init = true;
 
             Console.Clear();
             Task loadPark = Task.Factory.StartNew(() => LoadPark("ParkWorld"));
@@ -41,8 +45,29 @@ namespace WashWorldParking
             {
                 if (args.Length > 0)
                 {
-                    if (args[0] == "-admin") isAdmin = ASCII.AdminMenu();
-                    else Menu(myPark.ParkName, myWash.WashName);
+                    if (args[0] == "-admin")
+                    {
+                        isAdmin = ASCII.AdminMenu();
+                        if (init)
+                        {
+                            FileLogger.WriteToLog("Application started as -admin"); init = false;
+                            Victims = new List<Victims>();
+                            foreach (var item in myWash.Members)
+                            {
+                                Victims.Add(new Victims(item.LPlate, z, "Wash"));
+                                z++;
+                            }
+                            foreach (var item in myPark.Parkings)
+                            {
+                                if (item.Occupied) { Victims.Add(new Victims(item.LicensePlate, z, "Park")); z++; };
+                            }
+                        };
+                    }
+                    else
+                    {
+                        Menu(myPark.ParkName, myWash.WashName);
+                        if (init) { FileLogger.WriteToLog($"Application was started with (wrong) parameter ({args[0]})"); init = false; };
+                    }
                 }
                 else Menu(myPark.ParkName, myWash.WashName);
                 menuKey = Console.ReadKey(true);
@@ -66,30 +91,35 @@ namespace WashWorldParking
                                 if (_ == null) throw new NoWash();
                                 Console.WriteLine("Please input license plate manually:");
                                 lPlate = Console.ReadLine();
+                                FileLogger.WriteToLog($"License plate {lPlate} was entered in the system.");
                                 Console.Clear();
                                 if (myWash.CheckLicenseplate(lPlate))
                                 {
-                                        List<object> arguments = new List<object>();
-                                        arguments.Add(myWash.GetMemberWashType(lPlate));
-                                        arguments.Add(true);
+                                    List<object> arguments = new List<object>();
+                                    arguments.Add(myWash.GetMemberWashType(lPlate));
+                                    arguments.Add(true);
+                                    FileLogger.WriteToLog($"... and it was a member who is subscribed for {Enum.GetName(typeof(WashEnum), ((int)arguments[0]-1))}");
 
-                                        myWash.Worker.RunWorkerAsync(arguments);
-                                        _ = myWash.Washes.Find(s => s.Busy == false);
-                                        if (_ == null) throw new NoWash();
-                                        Console.WriteLine("Please enter washbooth number " + _.WashID);
-                                        MenuWait();
-                                        break;
+                                    myWash.Worker.RunWorkerAsync(arguments);
+                                    _ = myWash.Washes.Find(s => s.Busy == false);
+                                    if (_ == null) throw new NoWash();
+                                    Console.WriteLine($"Please enter washbooth number {_.WashID}");
+                                    FileLogger.WriteToLog($"... and he entered washbooth number {_.WashID}");
+                                    MenuWait();
+                                    break;
                                 
                                 }
                                 else
                                 {
+                                    
                                     Console.WriteLine("Please select washtype:");
                                     Console.WriteLine("[1] Bronze\n[2] Silver\n[3] Gold");
                                         int washSelect = Convert.ToInt16(Console.ReadLine());
                                         int price = 0;
-                                        Console.WriteLine("Please enter washbooth number " + _.WashID);
-
-                                        List<object> arguments = new List<object>();
+                                        Console.WriteLine($"Please enter washbooth number {_.WashID}");
+                                    FileLogger.WriteToLog($"... and it was NOT a member - customer selected {Enum.GetName(typeof(WashEnum), (washSelect - 1))}");
+                                    FileLogger.WriteToLog($"... and entered washbooth number {_.WashID}");
+                                    List<object> arguments = new List<object>();
                                         arguments.Add(washSelect);
                                         arguments.Add(false);
 
@@ -98,7 +128,7 @@ namespace WashWorldParking
                                         if (washSelect == 1) price = 75;
                                         if (washSelect == 2) price = 125;
                                         if (washSelect == 3) price = 195;
-                                        Console.WriteLine("You will be deducted {0:C} from your creditcard", price);
+                                        Console.WriteLine($"You will be deducted {price:C} from your creditcard");
 
                                         MenuWait();
                                         break;
@@ -112,12 +142,14 @@ namespace WashWorldParking
                             catch (NoWash ex)
                             {
                                 Console.WriteLine(ex.Message);
+                                FileLogger.WriteToLog(ex.Message);
                                 subMenuKey = MenuExit();
                             }
                             catch (Exception ex)
                             {
                                 Console.WriteLine("Something happened??");
                                 Console.WriteLine(ex.Message);
+                                FileLogger.WriteToLog(ex.Message);
                                 subMenuKey = MenuExit();
                             }
                         }
@@ -140,6 +172,7 @@ namespace WashWorldParking
                         Console.WriteLine("[3] - Golden shower (199DKK/Month)");
                         Console.Write("Please select: ");
                           string selection = Console.ReadLine();
+                        
                         while (selection.Length > 1)
                         {
                             Console.WriteLine("Please try again.");
@@ -157,18 +190,24 @@ namespace WashWorldParking
                             {
                                 throw new OutOfRange();
                             }
+                            FileLogger.WriteToLog($"We have a new client! {lPlate} wants to subscribe for {Enum.GetName(typeof(WashEnum), (wType - 1))}");
                             Console.Clear();
                             bool check = myWash.CreateAccount(lPlate, cCard, eMail, wType);
-                            if (check) Console.WriteLine("You have created an account for {0}", lPlate);
+                            if (check) Console.WriteLine($"You have created an account for {lPlate}");
                         }
                         catch (FormatException)
                         {
                             Console.WriteLine("Whoopsie, it looks like you tried to\ninput something that isn't a number.");
                         }
+                        catch (OutOfRange ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
                         catch (Exception ex)
                         {
                             Console.WriteLine("Something happened");
                             Console.WriteLine(ex.Message);
+                            FileLogger.WriteToLog(ex.Message);
                         }
                         MenuWait();
                         break;
@@ -189,8 +228,8 @@ namespace WashWorldParking
                             if (item.LPlate == lPlate)
                             {
                                 x = item;
-                                Console.WriteLine("Welcome " + item.LPlate);
-                                Console.WriteLine("You are currently subscribed to: " + item.WashName);
+                                Console.WriteLine($"Welcome {item.LPlate}");
+                                Console.WriteLine($"You are currently subscribed to: {item.WashName}");
                                 break;
                             }
                         }
@@ -199,6 +238,7 @@ namespace WashWorldParking
                         switch (answer.Key)
                         {
                             case ConsoleKey.Y:
+                                FileLogger.WriteToLog($"Customer with the license plate {x.LPlate} wants to change their subscription");
                                 Console.WriteLine("Choose one of the following:");
                                 Console.WriteLine("[1] - Bronze wash");
                                 Console.WriteLine("[2] - Silver wash");
@@ -211,21 +251,25 @@ namespace WashWorldParking
                                         x.WashType = 1;
                                         x.WashName = "Bronze wash";
                                         Console.WriteLine("You canged to " + x.WashName);
+                                        FileLogger.WriteToLog($"... and he changed to {x.WashName}");
                                         break;
                                     case ConsoleKey.D2:
                                         x.WashType = 2;
                                         x.WashName = "Silver wash";
                                         Console.WriteLine("You canged to " + x.WashName);
+                                        FileLogger.WriteToLog($"... and he changed to {x.WashName}");
                                         break;
                                     case ConsoleKey.D3:
                                         x.WashType = 3;
                                         x.WashName = "Golden shower";
                                         Console.WriteLine("You canged to " + x.WashName);
+                                        FileLogger.WriteToLog($"... and he changed to {x.WashName}");
                                         break;
                                     case ConsoleKey.C:
                                         Console.WriteLine("Are you sure you want to cancel subscription? [Y/N]");
                                         if (Console.ReadKey(true).Key == ConsoleKey.Y)
                                         {
+                                            FileLogger.WriteToLog($"{x.LPlate} have left the building!... What a tit");
                                             myWash.Members.Remove(x);
                                             Console.WriteLine("K thx bai!");
                                         }
@@ -259,18 +303,13 @@ namespace WashWorldParking
                         {
                             myWash.Worker.CancelAsync();
                             __cts.Cancel();
+                            FileLogger.WriteToLog($"Someone pressed the HALT! button real hard ...");
                         }
                         else
                         {
                             __cts.Cancel();
                         }
                         __cts.Dispose();
-                        break;
-                    case ConsoleKey.B:
-                        myWash.Worker.RunWorkerAsync();
-                        break;
-                    case ConsoleKey.V:
-                        myWash.Worker.CancelAsync();
                         break;
                 #endregion
 
@@ -295,6 +334,7 @@ namespace WashWorldParking
                             Console.Clear();
                             Console.WriteLine("Parking started. The time is now: {0}", DateTime.Now.ToString());
                             Console.WriteLine("Minimum parking time is two (2) hours.\nYour parking will expire at: {0}", DateTime.Now.AddHours(2).ToString());
+                            FileLogger.WriteToLog(string.Format("{0} have JUST parked his car! It will expire at {1}", lPlate, DateTime.Now.AddHours(2).ToString()));
                         }
                         MenuWait();
                         break;
@@ -316,7 +356,11 @@ namespace WashWorldParking
                                     {
                                         throw new FormatException("Only positive numbers allowed!");
                                     }
-                                    Console.WriteLine(myPark.AddParkTime(lPlate, addedTime));
+                                    string _ = myPark.AddParkTime(lPlate, addedTime);
+                                    Console.WriteLine(_);
+                                    FileLogger.WriteToLog($"{lPlate} just added {addedTime} to his parking.");
+                                    FileLogger.WriteToLog(_);
+
                                     break;
                                 }
                                 catch (NullReferenceException)
@@ -333,6 +377,7 @@ namespace WashWorldParking
                                     Console.WriteLine("You broke the program ...");
                                     Console.WriteLine(ex.Message);
                                     Console.WriteLine(ex);
+                                    FileLogger.WriteToLog(ex.Message);
                                 }
                                 subMenuKey = MenuExit();
                             }
@@ -367,7 +412,10 @@ namespace WashWorldParking
                         lPlate = Console.ReadLine();
                         try
                         {
-                            myPark.RevokeTicket(lPlate);
+                            string _ = myPark.RevokeTicket(lPlate);
+                            FileLogger.WriteToLog($"{lPlate} wants to revoke some of his parking time ...");
+                            FileLogger.WriteToLog(_);
+                            Console.WriteLine(_);
                         }
                         catch (FormatException)
                         {
@@ -375,11 +423,12 @@ namespace WashWorldParking
                         }
                         catch (NullReferenceException)
                         {
-                            Console.WriteLine("It doesn't look like the license plate {0} is parked at the moment.", lPlate);
+                            Console.WriteLine($"It doesn't look like the license plate {lPlate} is parked at the moment.");
                         }
                         catch (Exception e)
                         {
                             Console.WriteLine(e.Message);
+                            FileLogger.WriteToLog(e.Message);
                         }
                         MenuWait();
                         break;
@@ -389,22 +438,153 @@ namespace WashWorldParking
                         try
                         {
                             fee = myPark.CheckoutParking(lPlate);
-                            Console.WriteLine("Thank you for parking at ParkWorld.\nYour fee is {0:C}, and will be deducted from your creditcard automatically.", fee);
+                            Console.WriteLine($"Thank you for parking at ParkWorld.\nYour fee is {fee:C}, and will be deducted from your creditcard automatically.");
+                            FileLogger.WriteToLog($"{lPlate} just checked out, and was charged {fee:C} on his creditcard");
                         }
                         catch (NullReferenceException)
                         {
-                            Console.WriteLine("It doesn't look like the license plate {0} is parked at the moment.", lPlate);
+                            Console.WriteLine($"It doesn't look like the license plate {lPlate} is parked at the moment.");
                         }
                         MenuWait();
                         break;
                     #endregion
                     default:
                         break;
-                #endregion
+                    #endregion
 
                 #region Super secret admin area!
-
-                #endregion
+                    case ConsoleKey.I: // Udlæser loggen
+                        Console.WriteLine(FileLogger.ReadFromLog());
+                        MenuWait();
+                        break;
+                    case ConsoleKey.D:
+                        #region Update (dissect?) user
+                        Console.WriteLine("Please select the victim from the list below:");
+                        foreach (var item in Victims)
+                        {
+                            Console.WriteLine($"ID: [{item.index}]\tLicense plate: {item.lPlate}\tType: {item.TypeOf}");
+                        }
+                        Console.Write("Now, which ID do you want to IDDQD: ");
+                        string idString = Console.ReadLine();
+                        try
+                        {
+                            int idInt = Convert.ToInt16(idString);
+                            Victims _u = Victims.Find(s => s.index == idInt);
+                            Console.WriteLine("");
+                            Console.WriteLine($"You have selected {_u.lPlate}");
+                            if (_u.TypeOf == "Wash")
+                            {
+                                WashMembers W = myWash.Members.Find(s => s.LPlate == _u.lPlate);
+                                Console.WriteLine(W.WashName);
+                                Console.WriteLine(W.CCard);
+                                Console.WriteLine(W.EMail);
+                                Console.WriteLine("");
+                            }
+                            else if (_u.TypeOf == "Park")
+                            {
+                                ParkTypes P = myPark.Parkings.Find(s => s.LicensePlate == _u.lPlate);
+                                Console.WriteLine(P.ParkTime);
+                                Console.WriteLine(P.ExpirationTime);
+                                Console.WriteLine(P.Price);
+                            }
+                            Console.WriteLine("[1] Update user");
+                            Console.WriteLine("[X] Quitter ...");
+                            ConsoleKeyInfo K = Console.ReadKey();
+                            switch (K.Key)
+                            {
+                                case ConsoleKey.D1:
+                                    if (_u.TypeOf == "Wash") myWash.AdminUpd(_u.lPlate);
+                                    if (_u.TypeOf == "Park") myPark.AdminUpd(_u.lPlate);
+                                    break;
+                                default:
+                                        
+                                    break;
+                            }
+                        }
+                        catch (FormatException)
+                        {
+                            throw new BadUser();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+                        MenuWait();
+                        break;
+                    #endregion
+                    case ConsoleKey.K:
+                        #region Kill user!
+                        Console.WriteLine("Please select the victim from the list below:");
+                        foreach (var item in Victims)
+                        {
+                            Console.WriteLine($"ID: [{item.index}]\tLicense plate: {item.lPlate}\tType: {item.TypeOf}");
+                        }
+                        string idStr = Console.ReadLine();
+                        try
+                        {
+                            if (idStr == "X") break;
+                            int idI = Convert.ToInt16(idStr);
+                            Victims _d = Victims.Find(s => s.index == idI);
+                            if (_d.TypeOf == "Wash") myWash.Members.Remove(myWash.Members.Find(s => s.LPlate == _d.lPlate));
+                            if (_d.TypeOf == "Park")
+                            {
+                                ParkTypes pt = myPark.Parkings.Find(s => s.LicensePlate == _d.lPlate);
+                                pt.ExpirationTime = "";
+                                pt.LicensePlate = "";
+                                pt.Occupied = false;
+                                pt.ParkTime = "";
+                            }
+                            Victims.Remove(_d);
+                            Console.WriteLine("... he's gone now!");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            break;
+                        }
+                        MenuWait();
+                        break;
+                    #endregion
+                    case ConsoleKey.F:
+                        #region Find user (view details)
+                        Console.WriteLine("Please select the victim from the list below (X to quit!)");
+                        foreach (var item in Victims)
+                        {
+                            Console.WriteLine($"ID: [{item.index}]\tLicense plate: {item.lPlate}\tType: {item.TypeOf}");
+                        }
+                        string idStrng = Console.ReadLine();
+                        try
+                        {
+                            if (idStrng == "X") break;
+                            int idInteger = Convert.ToInt16(idStrng);
+                            Victims _f = Victims.Find(s => s.index == idInteger);
+                            Console.WriteLine("");
+                            Console.WriteLine($"You have selected {_f.lPlate}");
+                            if (_f.TypeOf == "Wash")
+                            {
+                                WashMembers W = myWash.Members.Find(s => s.LPlate == _f.lPlate);
+                                Console.WriteLine(W.WashName);
+                                Console.WriteLine(W.CCard);
+                                Console.WriteLine(W.EMail);
+                                Console.WriteLine("");
+                            }
+                            else if (_f.TypeOf == "Park")
+                            {
+                                ParkTypes P = myPark.Parkings.Find(s => s.LicensePlate == _f.lPlate);
+                                Console.WriteLine(P.ParkTime);
+                                Console.WriteLine(P.ExpirationTime);
+                                Console.WriteLine(P.Price);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            break;
+                        }
+                        MenuWait();
+                        break;
+                        #endregion
+                        #endregion
                 }
             } while (menuKey.Key != ConsoleKey.X);
 

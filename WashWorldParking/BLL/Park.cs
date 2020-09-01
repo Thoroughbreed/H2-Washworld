@@ -18,7 +18,6 @@ namespace WashWorldParking.BLL
         {
             ParkName = name;
             Parkings = new List<ParkTypes>();
-            //HardCode();
             Task loadP = Task.Factory.StartNew (() => ParkLoader());
             Console.SetCursorPosition(0, 0);
             Console.WriteLine("Loading parkinglot - please wait");
@@ -86,22 +85,25 @@ namespace WashWorldParking.BLL
         /// <returns></returns>
         public string AddParkTime(string lPlate, int hours)
         {
-            string result;
             searchType = Parkings.Find(s => s.LicensePlate == lPlate);
             DateTime oldTime;
             DateTime.TryParse(searchType.ExpirationTime, out oldTime);
             searchType.ExpirationTime = oldTime.AddHours(hours).ToString();
-            result = "New expiration time: " + searchType.ExpirationTime.ToString();
-            return result;
+            return string.Format($"New expiration time: {searchType.ExpirationTime}");
         }
 
-        public void RevokeTicket(string lPlate)
-        { 
+        /// <summary>
+        /// Fjerner tid fra sin parkering (får penge "retur")
+        /// </summary>
+        /// <param name="lPlate">Nummerplade</param>
+        /// <returns></returns>
+        public string RevokeTicket(string lPlate)
+        {
             searchType = Parkings.Find(s => s.LicensePlate == lPlate);
             double diff = Math.Floor((DateTime.Parse(searchType.ExpirationTime) - DateTime.Now).TotalHours);
             if (diff > 1)
             {
-                Console.WriteLine("Remaining parktime: " + diff);
+                Console.WriteLine($"Remaining parktime: {diff}");
                 Console.Write("How many hours to you like to revoke: ");
                 string revokeAmount = Console.ReadLine();
                 try
@@ -115,7 +117,7 @@ namespace WashWorldParking.BLL
                     {
                         throw new BadUser();
                     }
-                    Console.WriteLine("You've successfully revoked {0} hours. Your new expiration time is: {1}", revokeAmount, searchType.ExpirationTime);
+                    return string.Format($"You've successfully revoked {revokeAmount} hours. Your new expiration time is: {searchType.ExpirationTime}");
                 }
                 catch (FormatException ex)
                 {
@@ -125,12 +127,18 @@ namespace WashWorldParking.BLL
             }
             else if (diff < 2)
             {
-                Console.WriteLine("You cannot revoke parktime. You doesn't have any remaining hours.");
+                return string.Format("You cannot revoke parktime. You doesn't have any remaining hours.");
             }
 
             if (searchType == null) throw new NullReferenceException();
+            return null;
         }
 
+        /// <summary>
+        /// Betaler (og kører) fra parkeringen
+        /// </summary>
+        /// <param name="lPlate">Nummerplade</param>
+        /// <returns></returns>
         public decimal CheckoutParking(string lPlate)
         {
             searchType = Parkings.Find(s => s.LicensePlate == lPlate);
@@ -146,6 +154,11 @@ namespace WashWorldParking.BLL
             return _;
         }
 
+        /// <summary>
+        /// Checker om nummerpladen findes i systemet
+        /// </summary>
+        /// <param name="lPlate"></param>
+        /// <returns></returns>
         private bool CheckLicenseplate(string lPlate)
         {
             searchType = Parkings.Find(s => s.LicensePlate == lPlate);
