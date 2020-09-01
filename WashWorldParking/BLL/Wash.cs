@@ -31,14 +31,15 @@ namespace WashWorldParking.BLL
             Console.WriteLine("Washingmachine loaded.");
         }
 
+        /// <summary>
+        /// Init af vaskehallen
+        /// </summary>
         private void BeginWashThingy()
         {
             Members = new List<WashMembers>();
             Washes = new List<WashTypes>();
             worker = new BackgroundWorker() { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             Worker.DoWork += WorkerDoWork;
-            //Worker.ProgressChanged += WorkerProgressChanged;
-            // TODO Se på backgroundworker ... 
             for (int i = 0; i < 3; i++)
             {
                 Washes.Add(new WashTypes(i + 1));
@@ -47,30 +48,28 @@ namespace WashWorldParking.BLL
             Thread.Sleep(750);
         }
 
+        /// <summary>
+        /// BG Worker does some work!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void WorkerDoWork(object sender, DoWorkEventArgs e)
         {
+            List<object> parameter = e.Argument as List<object>;
+
             if (worker.CancellationPending) e.Cancel = true;
-            else { StartWash(3, false, e); }
+            else { StartWash(Convert.ToInt16(parameter[0]), Convert.ToBoolean(parameter[1]), worker); }
         }
 
-        public string GetWashTypes()
-        {
-            string result = "There is no washs available at the moment. 🥺";
-            foreach (var item in Washes)
-            {
-                if (!item.Busy)
-                {
-                    result += $"[{item.WashID}] Wash ID: {item.WashID} | The wash is available\n";
-                }
-            }
-            return result;
-        }
 
-        public string WashCar(string lPLate)
-        {
-            return GetWashTypes();
-        }
-
+        /// <summary>
+        /// Opretter en (fiktiv) konto til abonnement på gratis bilvask
+        /// </summary>
+        /// <param name="lPlate"></param>
+        /// <param name="cCard"></param>
+        /// <param name="eMail"></param>
+        /// <param name="wType"></param>
+        /// <returns></returns>
         public bool CreateAccount(string lPlate, string cCard, string eMail, int wType)
         {
             bool result = false;
@@ -88,6 +87,11 @@ namespace WashWorldParking.BLL
             return result;
         }
 
+        /// <summary>
+        /// Checker om nummerpladen har abonnement på vaskehallen
+        /// </summary>
+        /// <param name="lPlate"></param>
+        /// <returns></returns>
         public bool CheckLicenseplate(string lPlate)
         {
             searchType = Members.Find(s => s.LPlate == lPlate);
@@ -95,6 +99,11 @@ namespace WashWorldParking.BLL
             return true;
         }
 
+        /// <summary>
+        /// Finder hvilken type man har abonnement på
+        /// </summary>
+        /// <param name="lPlate"></param>
+        /// <returns></returns>
         public int GetMemberWashType (string lPlate)
         {
             searchType = Members.Find(s => s.LPlate == lPlate);
@@ -102,24 +111,34 @@ namespace WashWorldParking.BLL
 
         }
 
-        public decimal[] StartWash(int type, bool member, DoWorkEventArgs e)
+        /// <summary>
+        /// Starter vaskehallen (hvis den er ledig) - er der ingen ledige kaster den op
+        /// </summary>
+        /// <param name="type">Wasketype</param>
+        /// <param name="member">Medlem</param>
+        /// <param name="worker">BGW</param>
+        public void StartWash(int type, bool member, BackgroundWorker worker) // TODO exception checking!
+
         {
-            decimal[] result = new decimal[2];
             WashTypes find = Washes.Find(s => s.Busy == false);
+
             if (find == null) throw new NoWash();
-            result[0] = find.WashID;
-            result[1] = find.WashNow(type, member, worker, e);
+            find.WashNow(type, member, worker);
             find.W.Start();
-            return result;
         }
 
+        /// <summary>
+        /// Viser status tekst inklusiv en lille animation
+        /// </summary>
+        /// <param name="_">Token til at stoppe anim</param>
         public void StatusText(CancellationToken _)
         {
             bool work = true;
             int key = 1;
+            int count = 0;
             while (work)
             {
-                if (_.IsCancellationRequested) _.ThrowIfCancellationRequested();
+                if (_.IsCancellationRequested) _.ThrowIfCancellationRequested(); //stopper anim hvis den er aktiv under exit fra menu
                 else
                 {
                     foreach (var id in Washes)
@@ -130,21 +149,31 @@ namespace WashWorldParking.BLL
                             Console.WriteLine($"[{id.WashID}] The wash is currently busy");
                             Console.SetCursorPosition(30, (id.WashID * 2) + 1);
                             Console.WriteLine("It is currently: " + id.WashStatus);
+                            Thread.Sleep(100);
+                            key = ASCII.HorisontalWash(0, 20, key);
+                            count = 0;
                         }
                         else
                         {
                             Console.SetCursorPosition(30, id.WashID * 2);
-                            Console.WriteLine($"[{id.WashID}] The wash is available");
+                            Console.WriteLine($"[{id.WashID}] The wash is available      ");
                             Console.SetCursorPosition(30, (id.WashID * 2) + 1);
                             Console.WriteLine("---- WAITING FOR CAR ----                              ");
+                            count++;
+                            if (count > 2) //tæller antallet af inaktive vaskehaller. Hvis tallet bliver 3 stopper den l00p
+                            {
+                                work = false;
+                                break;
+                            }
                         }
                     }
-
-                    key = ASCII.HorisontalWash(0, 20, key);
                 }
                 Thread.Sleep(250);
             }
-            
+            Thread.Sleep(100);
+            Console.SetCursorPosition(0, 20);
+            Console.WriteLine("                              \n                              \n                              \n                              \n                              \n                              ");
+
         }
     }
 }

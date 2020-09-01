@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace WashWorldParking.MDL
 {
     public class BusPark : ParkTypes
@@ -7,7 +8,7 @@ namespace WashWorldParking.MDL
         {
             FriendlyName = "Bus stop";
             BoxSize = 4;
-            Price = 0;
+            Price = 20;
             Occupied = false;
             ParkTime = "";
             ExpirationTime = "";
@@ -31,7 +32,7 @@ namespace WashWorldParking.MDL
         {
             decimal fee = 0;
             if (DateTime.Parse(ExpirationTime) < DateTime.Now) fee = 1000;
-            var val = Math.Ceiling((DateTime.Parse(ExpirationTime) - DateTime.Parse(ParkTime)).TotalHours);
+            double val = Math.Ceiling((DateTime.Parse(ExpirationTime) - DateTime.Parse(ParkTime)).TotalHours);
             if (val < 2) val = 2;
             return (Price * Convert.ToDecimal(val)) + fee;
         }

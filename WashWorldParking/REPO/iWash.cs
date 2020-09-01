@@ -6,6 +6,5 @@ namespace WashWorldParking.REPO
     public interface iWash
     {
         public string WashName { get; }
-        public string GetWashTypes();
     }
 }

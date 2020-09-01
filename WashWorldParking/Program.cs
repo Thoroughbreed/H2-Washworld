@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using WashWorldParking.BLL;
@@ -26,8 +27,9 @@ namespace WashWorldParking
             Console.Clear();
             Task loadPark = Task.Factory.StartNew(() => LoadPark("ParkWorld"));
             Task loadWash = Task.Factory.StartNew(() => LoadWash("WaterWorld"));
-            Console.SetCursorPosition(0, 10);
+            Console.SetCursorPosition(0, 15);
             Console.WriteLine("˙ǝsɐǝןd punoɹɐ uǝǝɹɔs uɹnʇ\nuǝɥʇ 'sıɥʇ pɐǝɹ uɐɔ noʎ ɟı");
+            Thread.Sleep(100);
             while (!loadPark.IsCompleted || !loadWash.IsCompleted)
             {
                 Console.SetCursorPosition(q, 2);
@@ -37,7 +39,11 @@ namespace WashWorldParking
             }
             do
             {
-                if (args.Length > 0 && args[0] == "-admin") isAdmin = ASCII.AdminMenu();
+                if (args.Length > 0)
+                {
+                    if (args[0] == "-admin") isAdmin = ASCII.AdminMenu();
+                    else Menu(myPark.ParkName, myWash.WashName);
+                }
                 else Menu(myPark.ParkName, myWash.WashName);
                 menuKey = Console.ReadKey(true);
                 switch (menuKey.Key)
@@ -45,69 +51,77 @@ namespace WashWorldParking
                 #region Vaskedelen af menuen
                     case ConsoleKey.W:
                         #region Wash
-                        ConsoleKeyInfo subMenu;
-
                         Console.WriteLine("Trying to read license plate");
                         for (int i = 0; i < 10; i++)
                         {
                             Console.Write(".");
-                            Thread.Sleep(100);
+                            Thread.Sleep(50);
                         }
                         Console.WriteLine();
                         do
                         {
-                            Console.WriteLine("Please input license plate manually:");
-                            lPlate = Console.ReadLine();
-                            Console.Clear();
-                            if (myWash.CheckLicenseplate(lPlate))
+                            try
                             {
-                                decimal[] _ = new decimal[2];
-                                try
+                                WashTypes _ = myWash.Washes.Find(s => s.Busy == false);
+                                if (_ == null) throw new NoWash();
+                                Console.WriteLine("Please input license plate manually:");
+                                lPlate = Console.ReadLine();
+                                Console.Clear();
+                                if (myWash.CheckLicenseplate(lPlate))
                                 {
-        //                            _ = myWash.StartWash(myWash.GetMemberWashType(lPlate), true);
-                                    Console.WriteLine("Please enter washbooth number " + _[0]);
-                                    MenuWait();
-                                    break;
+                                        List<object> arguments = new List<object>();
+                                        arguments.Add(myWash.GetMemberWashType(lPlate));
+                                        arguments.Add(true);
+
+                                        myWash.Worker.RunWorkerAsync(arguments);
+                                        _ = myWash.Washes.Find(s => s.Busy == false);
+                                        if (_ == null) throw new NoWash();
+                                        Console.WriteLine("Please enter washbooth number " + _.WashID);
+                                        MenuWait();
+                                        break;
+                                
                                 }
-                                catch (NoWash ex)
+                                else
                                 {
-                                    Console.WriteLine(ex.Message);
-                                    subMenu = MenuExit();
-                                }
+                                    Console.WriteLine("Please select washtype:");
+                                    Console.WriteLine("[1] Bronze\n[2] Silver\n[3] Gold");
+                                        int washSelect = Convert.ToInt16(Console.ReadLine());
+                                        int price = 0;
+                                        Console.WriteLine("Please enter washbooth number " + _.WashID);
+
+                                        List<object> arguments = new List<object>();
+                                        arguments.Add(washSelect);
+                                        arguments.Add(false);
+
+                                        myWash.Worker.RunWorkerAsync(arguments);
+
+                                        if (washSelect == 1) price = 75;
+                                        if (washSelect == 2) price = 125;
+                                        if (washSelect == 3) price = 195;
+                                        Console.WriteLine("You will be deducted {0:C} from your creditcard", price);
+
+                                        MenuWait();
+                                        break;
+                                };
                             }
-                            else
+                            catch (FormatException)
                             {
-                                Console.WriteLine("Please select washtype:");
-                                Console.WriteLine("[1] Bronze\n[2] Silver\n[3] Gold");
-                                try
-                                {
-                                    int washSelect = Convert.ToInt16(Console.ReadLine());
-                                    decimal[] _ = new decimal[2];
-        //                            _ = myWash.StartWash(washSelect, false);
-                                    Console.WriteLine("Please enter washbooth number " + _[0]);
-                                    Console.WriteLine("You will be deducted {0:C} from your creditcard", _[1]);
-                                    MenuWait();
-                                    break;
-                                }
-                                catch (FormatException)
-                                {
-                                    Console.WriteLine("That wasn't a number, now was it?!");
-                                    subMenu = MenuExit();
-                                }
-                                catch (NoWash ex)
-                                {
-                                    Console.WriteLine(ex.Message);
-                                    subMenu = MenuExit();
-                                }
-                                catch (Exception ex)
-                                {
-                                    Console.WriteLine("Something happened??");
-                                    Console.WriteLine(ex.Message);
-                                    subMenu = MenuExit();
-                                }
-                            };
+                                Console.WriteLine("That wasn't a number, now was it?!");
+                                subMenuKey = MenuExit();
+                            }
+                            catch (NoWash ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                                subMenuKey = MenuExit();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine("Something happened??");
+                                Console.WriteLine(ex.Message);
+                                subMenuKey = MenuExit();
+                            }
                         }
-                        while(subMenu.Key != ConsoleKey.X);
+                        while(subMenuKey.Key != ConsoleKey.X);
                         break;
                     #endregion
                     case ConsoleKey.O:
@@ -239,7 +253,6 @@ namespace WashWorldParking
                         {
                             myWash.StatusText(__cancellation);
                         }, __cancellation);
-        //                __cts.Cancel();
                         Console.SetCursorPosition(0, 17);
                         subMenuKey = Console.ReadKey(true);
                         if (subMenuKey.Key == ConsoleKey.Y)

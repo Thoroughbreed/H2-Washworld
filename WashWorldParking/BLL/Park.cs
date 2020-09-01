@@ -106,7 +106,7 @@ namespace WashWorldParking.BLL
                 string revokeAmount = Console.ReadLine();
                 try
                 {
-                    int _ = Convert.ToInt16("-" + revokeAmount);
+                    int _ = Convert.ToInt16(revokeAmount);
                     if (_ > 0)
                     {
                         AddParkTime(lPlate, Convert.ToInt16(("-" + revokeAmount)));
@@ -136,6 +136,13 @@ namespace WashWorldParking.BLL
             searchType = Parkings.Find(s => s.LicensePlate == lPlate);
             decimal _ = searchType.CalculateFee();
             if (searchType == null) throw new NullReferenceException();
+            if (searchType != null)
+            {
+                searchType.ExpirationTime = "";
+                searchType.LicensePlate = "";
+                searchType.Occupied = false;
+                searchType.ParkTime = "";
+            }
             return _;
         }
 

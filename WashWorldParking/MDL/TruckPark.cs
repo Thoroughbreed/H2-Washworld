@@ -8,7 +8,7 @@ namespace WashWorldParking.MDL
         {
             FriendlyName = "Truck stop";
             BoxSize = 2;
-            Price = 20;
+            Price = 50;
             Occupied = false;
             ParkTime = "";
             ExpirationTime = "";
@@ -31,7 +31,7 @@ namespace WashWorldParking.MDL
         public override decimal CalculateFee()
         {
             decimal fee = 0;
-            if (DateTime.Parse(ExpirationTime) < DateTime.Now) fee = 1000;
+            if (DateTime.Parse(ExpirationTime) < DateTime.Now) fee = 2000;
             var val = Math.Ceiling((DateTime.Parse(ExpirationTime) - DateTime.Parse(ParkTime)).TotalHours);
             if (val < 2) val = 2;
             return (Price * Convert.ToDecimal(val)) + fee;

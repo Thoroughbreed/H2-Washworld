@@ -22,33 +22,74 @@ namespace WashWorldParking.REPO
             Busy = false;
         }
 
-        public void WashBronze()
+        public void WashBronze(BackgroundWorker worker)
         {
             Busy = true;
+            x = 1;
 
-            FriendlyName = "Bronze wash";
-            WashStatus = "Washing ...";
-            Thread.Sleep(5000);
-            WashStatus = "Drying ...";
-            Thread.Sleep(4500);
-            WashStatus = "";
+            while (!worker.CancellationPending)
+            {
+                FriendlyName = "Bronze wash";
+                if (x == 1)
+                {
+                    WashStatus = "Washing ...            ";
+                    Thread.Sleep(5000);
+                }
+                if (x == 2)
+                {
+                    WashStatus = "Drying ...       ";
+                    Thread.Sleep(2500);
+                    break;
+                }
+            }
+                if (worker.CancellationPending)
+            {
+                WashStatus = "Emergency halted";
+                Busy = false;
+                Halt(FriendlyName);
+            }
+            else WashStatus = "";
             Busy = false;
         }
 
-        public void WashSilver()
+        public void WashSilver(BackgroundWorker worker)
         {
             Busy = true;
+            x = 1;
 
-            FriendlyName = "Silver wash";
-            WashStatus = "Washing ...            ";
-            Thread.Sleep(5000);
-            WashStatus = "Washing rims ...       ";
-            Thread.Sleep(2500);
-            WashStatus = "Washing underside ...  ";
-            Thread.Sleep(2500);
-            WashStatus = "Dying ...              ";
-            Thread.Sleep(5500);
-            WashStatus = "";
+            while (!worker.CancellationPending)
+            {
+                FriendlyName = "Silver wash";
+                if (x == 1)
+                {
+                    WashStatus = "Washing ...            ";
+                    Thread.Sleep(5000);
+                }
+                if (x == 2)
+                {
+                    WashStatus = "Washing rims ...       ";
+                    Thread.Sleep(2500);
+                }
+                if (x == 3)
+                {
+                    WashStatus = "Washing underside ...  ";
+                    Thread.Sleep(2500);
+                }
+                if (x == 4)
+                {
+                    WashStatus = "Dying ...              ";
+                    Thread.Sleep(4500);
+                    break;
+                }
+                x++;
+            }
+            if (worker.CancellationPending)
+            {
+                WashStatus = "Emergency halted";
+                Busy = false;
+                Halt(FriendlyName);
+            }
+            else WashStatus = "";
             Busy = false;
         }
 
@@ -118,15 +159,15 @@ namespace WashWorldParking.REPO
             else return 999;
         }
 
-        public decimal WashNow(int type, bool member, BackgroundWorker worker, DoWorkEventArgs e)
+        public decimal WashNow(int type, bool member, BackgroundWorker worker)
         {
             switch(type)
             { 
                 case 1:
-                    W = new Task(() => WashBronze());
+                    W = new Task(() => WashBronze(worker));
                     break;
                 case 2:
-                    W = new Task(() => WashSilver());
+                    W = new Task(() => WashSilver(worker));
                     break;
                 case 3:
                     W = new Task(() => WashGold(worker));
