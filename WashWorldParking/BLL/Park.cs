@@ -111,6 +111,7 @@ namespace WashWorldParking.BLL
                     int _ = Convert.ToInt16(revokeAmount);
                     if (_ > 0)
                     {
+                        if (_ >= diff) throw new BadUser();
                         AddParkTime(lPlate, Convert.ToInt16(("-" + revokeAmount)));
                     }
                     else if (_ < 1)
@@ -180,6 +181,19 @@ namespace WashWorldParking.BLL
             }
             if (i == 0) return true;
             return false;
+        }
+
+        /// <summary>
+        /// Super secret admin shit!
+        /// </summary>
+        /// <param name="lp"></param>
+        public void AdminUpd(string lp, string pt, string et, decimal price)
+        {
+            searchType = Parkings.Find(s => s.LicensePlate == lp);
+            searchType.LicensePlate = lp;
+            searchType.ParkTime = pt;
+            searchType.ExpirationTime = et;
+            searchType.Price = price;
         }
 
         private void ParkLoader()

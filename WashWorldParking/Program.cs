@@ -470,11 +470,12 @@ namespace WashWorldParking
                         {
                             int idInt = Convert.ToInt16(idString);
                             Victims _u = Victims.Find(s => s.index == idInt);
+                            WashMembers W = myWash.Members.Find(s => s.LPlate == _u.lPlate);
+                            ParkTypes P = myPark.Parkings.Find(s => s.LicensePlate == _u.lPlate);
                             Console.WriteLine("");
                             Console.WriteLine($"You have selected {_u.lPlate}");
                             if (_u.TypeOf == "Wash")
                             {
-                                WashMembers W = myWash.Members.Find(s => s.LPlate == _u.lPlate);
                                 Console.WriteLine(W.WashName);
                                 Console.WriteLine(W.CCard);
                                 Console.WriteLine(W.EMail);
@@ -482,7 +483,6 @@ namespace WashWorldParking
                             }
                             else if (_u.TypeOf == "Park")
                             {
-                                ParkTypes P = myPark.Parkings.Find(s => s.LicensePlate == _u.lPlate);
                                 Console.WriteLine(P.ParkTime);
                                 Console.WriteLine(P.ExpirationTime);
                                 Console.WriteLine(P.Price);
@@ -490,14 +490,62 @@ namespace WashWorldParking
                             Console.WriteLine("[1] Update user");
                             Console.WriteLine("[X] Quitter ...");
                             ConsoleKeyInfo K = Console.ReadKey();
+                            Console.WriteLine();
                             switch (K.Key)
                             {
                                 case ConsoleKey.D1:
-                                    if (_u.TypeOf == "Wash") myWash.AdminUpd(_u.lPlate);
-                                    if (_u.TypeOf == "Park") myPark.AdminUpd(_u.lPlate);
+                                    if (_u.TypeOf == "Wash")
+                                    {
+                                        Console.WriteLine("Choose one of the following:");
+                                        Console.WriteLine("[1] - Bronze wash");
+                                        Console.WriteLine("[2] - Silver wash");
+                                        Console.WriteLine("[3] - Gold wash");
+                                        ConsoleKeyInfo a2 = Console.ReadKey(true);
+                                        Console.WriteLine();
+                                        Console.WriteLine("Now, whatabout his creditcard and e-mail?");
+                                        Console.WriteLine("Please enter new creditcard information (leave blank for default): ");
+                                        string CC = Console.ReadLine();
+                                        if (CC.Length == 0) CC = W.CCard;
+                                        Console.WriteLine("Please enter a new e-mail address (leave blank for default): ");
+                                        string EM = Console.ReadLine();
+                                        if (EM.Length == 0) EM = W.EMail;
+                                        Console.WriteLine("Now, should we change the license plate as well?");
+                                        string LP = Console.ReadLine();
+                                        if (LP.Length == 0) LP = W.LPlate;
+
+                                        Console.WriteLine(myWash.AdminUpd(W, a2, CC, EM, LP));
+                                    }
+                                    if (_u.TypeOf == "Park")
+                                    {
+                                        Console.WriteLine("Enter new parktime (leave blank for default): ");
+                                        string PT = Console.ReadLine();
+                                        if (PT.Length == 0) PT = P.ParkTime;
+                                        Console.WriteLine("Enter new expiration time (leave blank for default): ");
+                                        string ET = Console.ReadLine();
+                                        if (ET.Length == 0) ET = P.ExpirationTime;
+                                        Console.WriteLine("Enter new price (leave blank for default): ");
+                                        string PR = Console.ReadLine();
+                                        decimal Pr = P.Price;
+                                        if (PR.Length > 0)
+                                        {
+                                            try
+                                            {
+                                                Pr = Convert.ToDecimal(PR);
+                                            }
+                                            catch (FormatException)
+                                            {
+                                                throw new BadUser();
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                Console.WriteLine(ex.Message);
+                                            }
+                                        }
+                                        myPark.AdminUpd(_u.lPlate, PT, ET, Pr);
+                                    }
+                                    Console.WriteLine("The poor lad was updated ...");
                                     break;
                                 default:
-                                        
                                     break;
                             }
                         }

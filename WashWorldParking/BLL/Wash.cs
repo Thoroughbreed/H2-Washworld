@@ -173,7 +173,37 @@ namespace WashWorldParking.BLL
             Thread.Sleep(100);
             Console.SetCursorPosition(0, 20);
             Console.WriteLine("                              \n                              \n                              \n                              \n                              \n                              ");
+        }
 
+        /// <summary>
+        /// Super secret admin shit!
+        /// </summary>
+        /// <param name="lp"></param>
+        public string AdminUpd(WashMembers W, ConsoleKeyInfo a2, string CC, string EM, string LP)
+        {
+            switch (a2.Key)
+            {
+                case ConsoleKey.D1:
+                    W.WashType = 1;
+                    W.WashName = "Bronze wash";
+                    break;
+                case ConsoleKey.D2:
+                    W.WashType = 2;
+                    W.WashName = "Silver wash";
+                    break;
+                case ConsoleKey.D3:
+                    W.WashType = 3;
+                    W.WashName = "Golden shower";
+                    break;
+                default:
+                    throw new BadUser();
+            }
+            W.CCard = CC;
+            W.EMail = EM;
+            W.LPlate = LP;
+
+            string result = string.Format($"The poor sucker was updated to the following:\n{W.WashName}\n{W.CCard}\n{W.EMail}\n{W.LPlate}");
+            return result;
         }
     }
 }
