@@ -25,4 +25,9 @@ namespace WashWorldParking.UTIL
     {
         public override string Message { get { return "Wash is stopped!"; } }
     }
+
+    public class DOOM : Exception
+    {
+        public override string Message { get { return "You have unlocked godlike-mode ..."; } }
+    }
 }

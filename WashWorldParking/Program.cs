@@ -16,6 +16,7 @@ namespace WashWorldParking
         public static Wash myWash { get; set; }
         public static List<Victims> Victims { get; set; }
         private static ASCII MainMenu;
+        private static bool DOOM;
 
         static void Main(string[] args)
         {
@@ -76,8 +77,18 @@ namespace WashWorldParking
                     MainMenu = new ASCII(new List<string>()
                       { "Wash car", "Create Account", "See account", "See wash status", "Park car", "Add time", "Revoke ticket", "Checkout parking", "-- EXIT --" });
                 }
-                if (!isAdmin) menuKey = MainMenu.Draw();
-                else menuKey = Console.ReadKey(true).Key;
+                try
+                {
+                    if (!isAdmin) menuKey = MainMenu.Draw();
+                    else menuKey = Console.ReadKey(true).Key;
+                }
+                catch (DOOM ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    ASCII.DOOM();
+                    DOOM = true;
+                    break;
+                }
                 switch (menuKey)
                 {
                 #region Vaskedelen af menuen
@@ -643,7 +654,7 @@ namespace WashWorldParking
                 }
             } while (menuKey != ConsoleKey.X);
 
-            SaveAndExit(isAdmin);
+            if (!DOOM) SaveAndExit(isAdmin);
         }
 
         static void SaveAndExit(bool isAdmin)

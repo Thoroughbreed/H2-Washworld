@@ -924,6 +924,33 @@ namespace WashWorldParking.UTIL
                         return ConsoleKey.X;
                     case ConsoleKey.X:
                         return ConsoleKey.X;
+                    case ConsoleKey.I:
+                        if (Console.ReadKey(true).Key == ConsoleKey.D)
+                        {
+                            if (Console.ReadKey(true).Key == ConsoleKey.D)
+                            {
+                                if (Console.ReadKey(true).Key == ConsoleKey.Q)
+                                {
+                                    if (Console.ReadKey(true).Key == ConsoleKey.D)
+                                    {
+                                        Console.Clear();
+                                        throw new DOOM();
+                                    }
+                                }
+                            }
+                            else if (Console.ReadKey(true).Key == ConsoleKey.K)
+                            {
+                                if (Console.ReadKey(true).Key == ConsoleKey.F)
+                                {
+                                    if (Console.ReadKey(true).Key == ConsoleKey.A)
+                                    {
+                                        Console.Clear();
+                                        throw new DOOM();
+                                    }
+                                }
+                            }
+                        }
+                        break;
                     case ConsoleKey.Enter:
                         Console.CursorVisible = true;
                         // { "Wash car", "Create Account", "See account", "See wash status", "Park car", "Add time", "Revoke ticket", "Checkout parking", "Exit" });
@@ -937,12 +964,55 @@ namespace WashWorldParking.UTIL
                         if (selectedItemIndex == 7) return ConsoleKey.C;
                         if (selectedItemIndex == 8) return ConsoleKey.X;
                         break;
-
-                       
-
                 }
                 #endregion
             }
+        }
+
+        public static void DOOM()
+        {
+            int posX = (Console.WindowWidth - 71) / 2;
+            int posY = 5;
+            Console.WriteLine("");
+
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("=================     ===============     ===============   ========  ========");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("\\\\ . . . . . . .\\\\   //. . . . . . .\\\\   //. . . . . . .\\\\  \\\\. . .\\\\// . . //");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("||. . ._____. . .|| ||. . ._____. . .|| ||. . ._____. . .|| || . . .\\/ . . .||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("|| . .||   ||. . || || . .||   ||. . || || . .||   ||. . || ||. . . . . . . ||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("||. . ||   || . .|| ||. . ||   || . .|| ||. . ||   || . .|| || . | . . . . .||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("|| . .||   ||. _-|| ||-_ .||   ||. . || || . .||   ||. _-|| ||-_.|\\ . . . . ||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("||. . ||   ||-'  || ||  `-||   || . .|| ||. . ||   ||-'  || ||  `|\\_ . .|. .||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("|| . _||   ||    || ||    ||   ||_ . || || . _||   ||    || ||   |\\ `-_/| . ||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("||_-' ||  .|/    || ||    \\|.  || `-_|| ||_-' ||  .|/    || ||   | \\  / |-_.||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("||    ||_-'      || ||      `-_||    || ||    ||_-'      || ||   | \\  / |  `||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("||    `'         || ||         `'    || ||    `'         || ||   | \\  / |   ||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("||            .===' `===.         .==='.`===.         .===' /==. |  \\/  |   ||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("||         .=='   \\_|-_ `===. .==='   _|_   `===. .===' _-|/   `==  \\/  |   ||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("||      .=='    _-'    `-_  `='    _-'   `-_    `='  _-'   `-_  /|  \\/  |   ||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("||   .=='    _-'          `-__\\._-'         `-_./__-'         `' |. /|  |   ||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("||.=='    _-'                                                     `' |  /==.||");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("== '    _-'                                                           \\/   `==");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine("\\   _ -'                                                               `-_   /");
+            Console.SetCursorPosition(posX, posY++);
+            Console.WriteLine(" `''                                                                     ``'");
         }
     }
 }
