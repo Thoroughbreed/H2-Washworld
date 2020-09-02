@@ -8,9 +8,21 @@ namespace WashWorldParking.UTIL
 {
     public class ASCII
     {
-        public ASCII()
-        {
-        }
+        public List<string> MenuItems { get; }
+        public event Action<int> IndexChanged;
+
+        private readonly int _screenWidth;
+        private readonly int _screenHeight;
+        private readonly int _offset;
+        private readonly bool _clear;
+
+        /// <summary>
+        /// Starts a horizontal wash-thing (must be started with the return value, default 1)
+        /// </summary>
+        /// <param name="x">Cursor position</param>
+        /// <param name="y">Cursor position</param>
+        /// <param name="key">Program step</param>
+        /// <returns>Program step</returns>
         public static int HorisontalWash(int x, int y, int key)
         {
             if (key > 9) key = 1;
@@ -98,6 +110,11 @@ namespace WashWorldParking.UTIL
             return key;
         }
 
+        /// <summary>
+        /// Starts a vertical wash-thing - runs infinite (until thread dies)
+        /// </summary>
+        /// <param name="x">Cursor position</param>
+        /// <param name="y">Cursor position</param>
         public static void VerticalWash(int x, int y)
         {
             int x1;
@@ -726,6 +743,11 @@ namespace WashWorldParking.UTIL
             }
         }
 
+        /// <summary>
+        /// Displays a "loading" spinner - spins 1000 times (or until thread dies)
+        /// </summary>
+        /// <param name="z">Cursor position</param>
+        /// <param name="y">Cursor position</param>
         public static void Spinner(int z, int y)
         {
             int x = 0;
@@ -740,6 +762,12 @@ namespace WashWorldParking.UTIL
             }
         }
 
+        /// <summary>
+        /// Displays a "loading" spinner - spins until the boolean is false
+        /// </summary>
+        /// <param name="z">Cursor position</param>
+        /// <param name="y">Cursor position</param>
+        /// <param name="x">Bool - spin now?</param>
         public static void SpinnerBool(int z, int y, bool x)
         {
             int i = 0;
@@ -754,6 +782,10 @@ namespace WashWorldParking.UTIL
             }
         }
 
+        /// <summary>
+        /// Displays the administrator ASCII art menu
+        /// </summary>
+        /// <returns>isAdmin?</returns>
         public static bool AdminMenu()
         {
             Console.Clear();
@@ -787,7 +819,9 @@ namespace WashWorldParking.UTIL
             return true;
         }
 
-        /* Virker ikke...???
+
+        // Converts GIF to ASCII art
+        /* Virker ikke på .Net Core til macOS :(
         public static void ConvertGif()
         {
             Image image = Image.FromFile(@"C:\some_animated_gif.gif");
@@ -827,6 +861,11 @@ namespace WashWorldParking.UTIL
         }
         */
 
+        /// <summary>
+        /// Shows the old-style user menu
+        /// </summary>
+        /// <param name="pname">Parking lot name</param>
+        /// <param name="wname">Wash name</param>
         static void Menu(string pname, string wname)
         {
             Console.Clear();
@@ -848,14 +887,14 @@ namespace WashWorldParking.UTIL
             Console.WriteLine("╚══════════════════════════╝");
         }
 
-        public List<string> MenuItems { get; }
-        public event Action<int> IndexChanged;
-
-        private readonly int _screenWidth;
-        private readonly int _screenHeight;
-        private readonly int _offset;
-        private readonly bool _clear;
-
+        /// <summary>
+        /// Initiates the "fancy menu"
+        /// </summary>
+        /// <param name="menuItems">String-list of menu items</param>
+        /// <param name="screenWidth">Optional - console width</param>
+        /// <param name="screenHeight">Optional - console height</param>
+        /// <param name="offset">Optional - x offset</param>
+        /// <param name="clear">Optional - clears console (default true)</param>
         public ASCII(List<string> menuItems, int screenWidth = -1, int screenHeight = -1, int offset = 0, bool clear = true)
         {
             MenuItems = menuItems;
@@ -865,6 +904,10 @@ namespace WashWorldParking.UTIL
             _clear = clear;
         }
 
+        /// <summary>
+        /// Draws the menu itself
+        /// </summary>
+        /// <returns>ConsoleKey for selected menu (returns CK to coorporate with oldskool menu style)</returns>
         public ConsoleKey Draw()
         {
             if (_clear)
@@ -883,9 +926,11 @@ namespace WashWorldParking.UTIL
 
             while (true)
             {
-                posY = (_screenHeight - MenuItems.Count) / 2;
+                // Centers text vertically
+                posY = (_screenHeight - MenuItems.Count) / 2; 
                 foreach (var item in MenuItems)
                 {
+                    // Centers text horizontally
                     int posX = (_screenWidth - item.Length) / 2 + _offset;
                     if (MenuItems.IndexOf(item) == selectedItemIndex)
                     {
@@ -924,7 +969,7 @@ namespace WashWorldParking.UTIL
                         return ConsoleKey.X;
                     case ConsoleKey.X:
                         return ConsoleKey.X;
-                    case ConsoleKey.I:
+                    case ConsoleKey.I: // DOOM easter egg! IDDQD!
                         if (Console.ReadKey(true).Key == ConsoleKey.D)
                         {
                             if (Console.ReadKey(true).Key == ConsoleKey.D)
@@ -938,21 +983,13 @@ namespace WashWorldParking.UTIL
                                     }
                                 }
                             }
-                            else if (Console.ReadKey(true).Key == ConsoleKey.K)
-                            {
-                                if (Console.ReadKey(true).Key == ConsoleKey.F)
-                                {
-                                    if (Console.ReadKey(true).Key == ConsoleKey.A)
-                                    {
-                                        Console.Clear();
-                                        throw new DOOM();
-                                    }
-                                }
-                            }
                         }
                         break;
+                #endregion
                     case ConsoleKey.Enter:
-                        Console.CursorVisible = true;
+                        // Uncomment line below to show the cursor
+                        // Console.CursorVisible = true;
+
                         // { "Wash car", "Create Account", "See account", "See wash status", "Park car", "Add time", "Revoke ticket", "Checkout parking", "Exit" });
                         if (selectedItemIndex == 0) return ConsoleKey.W;
                         if (selectedItemIndex == 1) return ConsoleKey.O;
@@ -965,10 +1002,12 @@ namespace WashWorldParking.UTIL
                         if (selectedItemIndex == 8) return ConsoleKey.X;
                         break;
                 }
-                #endregion
             }
         }
 
+        /// <summary>
+        /// DOOM!
+        /// </summary>
         public static void DOOM()
         {
             int posX = (Console.WindowWidth - 71) / 2;

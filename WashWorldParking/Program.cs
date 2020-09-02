@@ -31,6 +31,7 @@ namespace WashWorldParking
             bool init = true;
 
             Console.Clear();
+            Console.CursorVisible = false;
             Task loadPark = Task.Factory.StartNew(() => LoadPark("ParkWorld"));
             Task loadWash = Task.Factory.StartNew(() => LoadWash("WaterWorld"));
             Console.SetCursorPosition(0, 15);
@@ -45,14 +46,15 @@ namespace WashWorldParking
             }
             do
             {
-                if (args.Length > 0)
+                #region Startup parameter checker
+                if (args.Length > 0) // Checking for startup parameters
                 {
-                    if ((args[0] == "-admin") || (args[0] == "-iddqd"))
+                    if ((args[0] == "-admin") || (args[0] == "-iddqd")) 
                     {
-                        isAdmin = ASCII.AdminMenu();
+                        isAdmin = ASCII.AdminMenu(); // Loads admin menu if parameter is admin or iddqd
                         if (init)
                         {
-                            FileLogger.WriteToLog($"Application started as {args[0]}"); init = false;
+                            FileLogger.WriteToLog($"Application started as {args[0]}"); init = false; // set initial startup as false
                             Victims = new List<Victims>();
                             foreach (var item in myWash.Members)
                             {
@@ -67,13 +69,16 @@ namespace WashWorldParking
                     }
                     else
                     {
+                        // Loads "fancy" menu for normal users if wrong parameters are entered
                         MainMenu = new ASCII(new List<string>()
                            { "Wash car", "Create Account", "See account", "See wash status", "Park car", "Add time", "Revoke ticket", "Checkout parking", "-- EXIT --"});
                         if (init) { FileLogger.WriteToLog($"Application was started with (wrong) parameter ({args[0]})"); init = false; };
                     }
                 }
+                #endregion
                 else
                 {
+                    // Loads "fancy" menu for normal users
                     MainMenu = new ASCII(new List<string>()
                       { "Wash car", "Create Account", "See account", "See wash status", "Park car", "Add time", "Revoke ticket", "Checkout parking", "-- EXIT --" });
                 }
@@ -84,6 +89,7 @@ namespace WashWorldParking
                 }
                 catch (DOOM ex)
                 {
+                    // Catches the "DOOM" exception/easter egg
                     Console.WriteLine(ex.Message);
                     ASCII.DOOM();
                     DOOM = true;
@@ -94,6 +100,8 @@ namespace WashWorldParking
                 #region Vaskedelen af menuen
                     case ConsoleKey.W:
                         #region Wash
+                        // Washes a car (cars only! No trucks or busses!)
+                        // Fake license plate scanner :)
                         Console.WriteLine("Trying to read license plate");
                         for (int i = 0; i < 10; i++)
                         {
@@ -105,12 +113,14 @@ namespace WashWorldParking
                         {
                             try
                             {
+                                // Checks for available wash - throws exception if none found.
                                 WashTypes _ = myWash.Washes.Find(s => s.Busy == false);
                                 if (_ == null) throw new NoWash();
                                 Console.WriteLine("Please input license plate manually:");
                                 lPlate = Console.ReadLine();
                                 FileLogger.WriteToLog($"License plate {lPlate} was entered in the system.");
                                 Console.Clear();
+                                // Checks for membership (and what type)
                                 if (myWash.CheckLicenseplate(lPlate))
                                 {
                                     List<object> arguments = new List<object>();
@@ -125,11 +135,10 @@ namespace WashWorldParking
                                     FileLogger.WriteToLog($"... and he entered washbooth number {_.WashID}");
                                     MenuWait();
                                     break;
-                                
                                 }
                                 else
                                 {
-                                    
+                                    // Non subscribed customer
                                     Console.WriteLine("Please select washtype:");
                                     Console.WriteLine("[1] Bronze\n[2] Silver\n[3] Gold");
                                         int washSelect = Convert.ToInt16(Console.ReadLine());
@@ -173,68 +182,92 @@ namespace WashWorldParking
                         }
                         while(subMenuKey.Key != ConsoleKey.X);
                         break;
-                    #endregion
+                        #endregion
                     case ConsoleKey.O:
                         #region Open account
-                        Console.WriteLine("Please fill out this form:");
-                        Console.WriteLine();
-                        Console.Write("Please input license plate: ");
-                          lPlate = Console.ReadLine();
-                        Console.Write("Please input your creditcard number: ");
-                          string cCard = Console.ReadLine();
-                        Console.Write("Please input your e-mail: ");
-                          string eMail = Console.ReadLine();
-                        Console.WriteLine("What type of wash you'd like to subscribe for:");
-                        Console.WriteLine("[1] - Bronze wash (120DKK/Month)");
-                        Console.WriteLine("[2] - Silver wash (150DKK/Month)");
-                        Console.WriteLine("[3] - Golden shower (199DKK/Month)");
-                        Console.Write("Please select: ");
-                          string selection = Console.ReadLine();
-                        
-                        while (selection.Length > 1)
+                        // Opens a new wash-subscription account, no regex on creditcard/e-mail
+                        do
                         {
-                            Console.WriteLine("Please try again.");
+                            Console.WriteLine("Please fill out this form:");
+                            Console.WriteLine();
+                            Console.Write("Please input license plate: ");
+                            lPlate = Console.ReadLine();
+                            Console.Write("Please input your creditcard number: ");
+                            string cCard = Console.ReadLine();
+                            Console.Write("Please input your e-mail: ");
+                            string eMail = Console.ReadLine();
                             Console.WriteLine("What type of wash you'd like to subscribe for:");
                             Console.WriteLine("[1] - Bronze wash (120DKK/Month)");
                             Console.WriteLine("[2] - Silver wash (150DKK/Month)");
                             Console.WriteLine("[3] - Golden shower (199DKK/Month)");
                             Console.Write("Please select: ");
-                            selection = Console.ReadLine();
-                        }
-                        try
-                        {
-                            int wType = Convert.ToInt16(selection);
-                            if (wType > 3)
+                            string selection = Console.ReadLine();
+                            // Checks for empty fields in the form
+                            while ((selection.Length == 0) || (selection.Length == 0) || (cCard.Length == 0) || (lPlate.Length == 0) || (eMail.Length == 0))
                             {
-                                throw new OutOfRange();
+                                Console.WriteLine("Please try again.");
+                                if (lPlate.Length < 1)
+                                {
+                                    Console.Write("Please input license plate: ");
+                                    lPlate = Console.ReadLine();
+                                }
+                                if (cCard.Length < 1)
+                                {
+                                    Console.Write("Please input your creditcard number: ");
+                                    cCard = Console.ReadLine();
+                                }
+                                if (eMail.Length < 1)
+                                {
+                                    Console.Write("Please input your e-mail: ");
+                                    eMail = Console.ReadLine();
+                                }
+                                if ((selection != "1") || (selection != "2") || (selection != "3"))
+                                {
+                                    Console.WriteLine("What type of wash you'd like to subscribe for:");
+                                    Console.WriteLine("[1] - Bronze wash (120DKK/Month)");
+                                    Console.WriteLine("[2] - Silver wash (150DKK/Month)");
+                                    Console.WriteLine("[3] - Golden shower (199DKK/Month)");
+                                    Console.Write("Please select: ");
+                                    selection = Console.ReadLine();
+                                }
                             }
-                            FileLogger.WriteToLog($"We have a new client! {lPlate} wants to subscribe for {Enum.GetName(typeof(WashEnum), (wType - 1))}");
-                            Console.Clear();
-                            bool check = myWash.CreateAccount(lPlate, cCard, eMail, wType);
-                            if (check) Console.WriteLine($"You have created an account for {lPlate}");
-                        }
-                        catch (FormatException)
-                        {
-                            Console.WriteLine("Whoopsie, it looks like you tried to\ninput something that isn't a number.");
-                        }
-                        catch (OutOfRange ex)
-                        {
-                            Console.WriteLine(ex.Message);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Something happened");
-                            Console.WriteLine(ex.Message);
-                            FileLogger.WriteToLog(ex.Message);
-                        }
-                        MenuWait();
+                            try
+                            {
+                                int wType = Convert.ToInt16(selection);
+                                if (wType > 3)
+                                {
+                                    throw new OutOfRange();
+                                }
+                                FileLogger.WriteToLog($"We have a new client! {lPlate} wants to subscribe for {Enum.GetName(typeof(WashEnum), (wType - 1))}");
+                                Console.Clear();
+                                bool check = myWash.CreateAccount(lPlate, cCard, eMail, wType);
+                                if (check) Console.WriteLine($"You have created an account for {lPlate}");
+                            }
+                            catch (FormatException)
+                            {
+                                Console.WriteLine("Whoopsie, it looks like you tried to\ninput something that isn't a number.");
+                            }
+                            catch (OutOfRange ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine("Something happened");
+                                Console.WriteLine(ex.Message);
+                                FileLogger.WriteToLog(ex.Message);
+                            }
+                            subMenuKey = MenuExit();
+                        } while (subMenuKey.Key != ConsoleKey.X);
                         break;
-                    #endregion
+                        #endregion
                     case ConsoleKey.S:
                         #region See account
+                        // Lets the user check the user account, and change the wash-type (or cancel)
                         WashMembers x = null;
                         Console.Write("Please input your license plate: ");
                         lPlate = Console.ReadLine();
+                        // Checks if plate is subscribed
                         if (!myWash.CheckLicenseplate(lPlate))
                         {
                             Console.WriteLine("I'm sorry Dave. I cannot let you do that ...");
@@ -299,41 +332,45 @@ namespace WashWorldParking
                                 break;
                             default:
                                 Console.WriteLine("You did something wrong.");
-                                MenuWait();
                                 break;
                         }
-
                         MenuWait();
                         break;
                         #endregion
                     case ConsoleKey.H:
+                        #region Status for wash + ability to emergency halt
                         var __cts = new CancellationTokenSource();
                         CancellationToken __cancellation = __cts.Token;
-                        Console.WriteLine("Are you sure that you want to emergency halt all the washers?");
+                        Console.WriteLine("-- WASH STATUS --");
+                        Console.WriteLine("Do you want to emergency halt all the washers?");
                         Console.WriteLine("[Y]/[N] - any other key to abort from menu.");
+                        // Starts the wash-status update thing async
                         Task stat = Task.Run(() =>
                         {
                             myWash.StatusText(__cancellation);
                         }, __cancellation);
                         Console.SetCursorPosition(0, 17);
                         subMenuKey = Console.ReadKey(true);
+                        // Cancels the wash-thread and the status update-thread
                         if (subMenuKey.Key == ConsoleKey.Y)
                         {
                             myWash.Worker.CancelAsync();
                             __cts.Cancel();
                             FileLogger.WriteToLog($"Someone pressed the HALT! button real hard ...");
                         }
-                        else
+                        else // Cancels the status update-thread when exit from menu
                         {
                             __cts.Cancel();
                         }
                         __cts.Dispose();
+                        MenuWait();
                         break;
+                        #endregion
                 #endregion
 
                 #region Parkeringsdelen af menuen
-                    #region Parker bil - kontrollerer om nummerpladen allerede er parkeret
                     case ConsoleKey.P:
+                        #region Parks vehicle
                         Console.WriteLine("Please input your vehicle type:");
                         Console.WriteLine("1 - Car");
                         Console.WriteLine("2 - Car - Handicap parking viable");
@@ -344,6 +381,7 @@ namespace WashWorldParking
                         Console.WriteLine();
                         Console.Write("Please input your license plate: ");
                         lPlate = Console.ReadLine();
+                        // Checks licenseplate (and type)
                         int result = myPark.ParkCar(pType, lPlate);
                         if (result == 1) Console.WriteLine("Unfortunately we don't have any free parking spaces for your automobile type.\nPlease try again later.");
                         else if (result == 2) Console.WriteLine("License plate already parked!");
@@ -356,8 +394,9 @@ namespace WashWorldParking
                         }
                         MenuWait();
                         break;
-                    #endregion
-                    case ConsoleKey.A: // Tilføjer tid til parkering | Viser al info som admin
+                        #endregion
+                    case ConsoleKey.A:
+                        #region Adds time to parking || Displays all information (non admin/admin)
                         if (!isAdmin)
                         {
                             do
@@ -422,10 +461,11 @@ namespace WashWorldParking
                             Console.WriteLine("Total number of subscribers: " + myWash.Members.Count);
                         }
                         MenuWait();
-                        
                         break;
+                        #endregion
                     case ConsoleKey.R:
                         #region Revoke ticket
+                        // Gives the user the ability to refund some of his parking ticket (if viable)
                         Console.Write("Please enter your license plate: ");
                         lPlate = Console.ReadLine();
                         try
@@ -450,7 +490,10 @@ namespace WashWorldParking
                         }
                         MenuWait();
                         break;
+                        #endregion
                     case ConsoleKey.C:
+                        #region Checkout parking
+                        // Checks out from parkinglot (if plate is parked)
                         Console.Write("Please enter your license plate: ");
                         lPlate = Console.ReadLine();
                         try
@@ -465,25 +508,29 @@ namespace WashWorldParking
                         }
                         MenuWait();
                         break;
-                    #endregion
+                        #endregion
                     default:
                         break;
-                    #endregion
+                #endregion
 
                 #region Super secret admin area!
-                    case ConsoleKey.I: // Udlæser loggen
+                    case ConsoleKey.I:
+                        // Inspects log file
                         Console.WriteLine(FileLogger.ReadFromLog());
                         MenuWait();
                         break;
                     case ConsoleKey.D:
                         #region Update (dissect?) user
-                        Console.WriteLine("Please select the victim from the list below:");
+                        // Updates user parameters (including things as parking price)
+                        // Checks for wash-user or parking-user
+                        Console.WriteLine("Please select the victim from the list below (X to quit!)");
                         foreach (var item in Victims)
                         {
                             Console.WriteLine($"ID: [{item.index}]\tLicense plate: {item.lPlate}\tType: {item.TypeOf}");
                         }
                         Console.Write("Now, which ID do you want to IDDQD: ");
                         string idString = Console.ReadLine();
+                        if (idString == "X") break;
                         try
                         {
                             int idInt = Convert.ToInt16(idString);
@@ -504,6 +551,7 @@ namespace WashWorldParking
                                 Console.WriteLine(P.ParkTime);
                                 Console.WriteLine(P.ExpirationTime);
                                 Console.WriteLine(P.Price);
+                                Console.WriteLine("");
                             }
                             Console.WriteLine("[1] Update user");
                             Console.WriteLine("[X] Quitter ...");
@@ -577,10 +625,11 @@ namespace WashWorldParking
                         }
                         MenuWait();
                         break;
-                    #endregion
+                        #endregion
                     case ConsoleKey.K:
                         #region Kill user!
-                        Console.WriteLine("Please select the victim from the list below:");
+                        // Finds user and deletes it from file
+                        Console.WriteLine("Please select the victim from the list below (X to quit!)");
                         foreach (var item in Victims)
                         {
                             Console.WriteLine($"ID: [{item.index}]\tLicense plate: {item.lPlate}\tType: {item.TypeOf}");
@@ -606,13 +655,14 @@ namespace WashWorldParking
                         catch (Exception ex)
                         {
                             Console.WriteLine(ex.Message);
-                            break;
                         }
                         MenuWait();
                         break;
-                    #endregion
+                        #endregion
                     case ConsoleKey.F:
                         #region Find user (view details)
+                        // Prints out details of a user (license plate)
+                        // Checks for wash-member or park-member
                         Console.WriteLine("Please select the victim from the list below (X to quit!)");
                         foreach (var item in Victims)
                         {
@@ -650,13 +700,18 @@ namespace WashWorldParking
                         MenuWait();
                         break;
                         #endregion
-                        #endregion
+                #endregion
                 }
             } while (menuKey != ConsoleKey.X);
 
-            if (!DOOM) SaveAndExit(isAdmin);
+            if (!DOOM) SaveAndExit(isAdmin); //Doesn't save the settings if easter egg exception is thrown.
         }
 
+        /// <summary>
+        /// Saves and quits the program softly.
+        /// Park, wash and log is saved in 3 seperate files
+        /// </summary>
+        /// <param name="isAdmin">Location of text if admin or non admin</param>
         static void SaveAndExit(bool isAdmin)
         {
             int yOffset = 27;
@@ -679,10 +734,18 @@ namespace WashWorldParking
             Console.WriteLine("K thx bai!");
         }
 
+        /// <summary>
+        /// Clears "old" text and prints out "Press any key to continue"
+        /// </summary>
         static void MenuWait()
         {
+            Console.SetCursorPosition(0, 32);
+            Console.WriteLine("                                                          ");
+            Console.WriteLine("                                                          ");
+            Console.WriteLine("                                                          ");
+            Console.SetCursorPosition(0, 32);
             Console.WriteLine("Press any key to continue");
-            Console.SetCursorPosition(30, 2);
+            Console.SetCursorPosition(30,2);
             for (int i = 0; i < 6; i++)
             {
                 Console.WriteLine();
@@ -690,6 +753,10 @@ namespace WashWorldParking
             Console.ReadKey(true);
         }
 
+        /// <summary>
+        /// Prints out "Press any key to try again, press X to exit"
+        /// </summary>
+        /// <returns>ConsoleKey</returns>
         static ConsoleKeyInfo MenuExit()
         {
             Console.WriteLine("Press any key to try again");
@@ -698,11 +765,17 @@ namespace WashWorldParking
             return _;
         }
 
+        /// <summary>
+        /// Loading parkinglot
+        /// </summary>
         static void LoadPark(string pName)
         {
             myPark = new Park(pName);
         }
 
+        /// <summary>
+        /// Loading wash
+        /// </summary>
         static void LoadWash(string wName)
         {
             myWash = new Wash(wName);
