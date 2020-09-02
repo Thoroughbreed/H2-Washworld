@@ -29,13 +29,14 @@ namespace WashWorldParking.BLL
         }
 
         /// <summary>
-        /// Parkerer en bil
+        /// Parks vehicle
         /// </summary>
         /// <param name="input">Keypress</param>
-        /// <param name="lPlate">Nummerplade</param>
+        /// <param name="lPlate"></param>
         /// <returns>INT (0: OK - 1: Occupied - 2: lPlate exists!)</returns>
         public int ParkCar(ConsoleKeyInfo input, string lPlate)
         {
+            // Returns "Exist" if the plate is already parked
             if (CheckLicenseplate(lPlate)) return 2;
             switch (input.Key)
             {
@@ -78,10 +79,10 @@ namespace WashWorldParking.BLL
         }
 
         /// <summary>
-        /// Tilføjer ekstra tid til sin parkering
+        /// Adds time to parking ticket
         /// </summary>
-        /// <param name="lPlate">Nummerplade</param>
-        /// <param name="hours">INT/Tid i hele timer</param>
+        /// <param name="lPlate"></param>
+        /// <param name="hours"></param>
         /// <returns></returns>
         public string AddParkTime(string lPlate, int hours)
         {
@@ -93,9 +94,9 @@ namespace WashWorldParking.BLL
         }
 
         /// <summary>
-        /// Fjerner tid fra sin parkering (får penge "retur")
+        /// Revokes time from parking ticket, and gets a "refund"
         /// </summary>
-        /// <param name="lPlate">Nummerplade</param>
+        /// <param name="lPlate"></param>
         /// <returns></returns>
         public string RevokeTicket(string lPlate)
         {
@@ -136,9 +137,9 @@ namespace WashWorldParking.BLL
         }
 
         /// <summary>
-        /// Betaler (og kører) fra parkeringen
+        /// Pays for parking (and removes car from parkinglot
         /// </summary>
-        /// <param name="lPlate">Nummerplade</param>
+        /// <param name="lPlate"></param>
         /// <returns></returns>
         public decimal CheckoutParking(string lPlate)
         {
@@ -156,7 +157,7 @@ namespace WashWorldParking.BLL
         }
 
         /// <summary>
-        /// Checker om nummerpladen findes i systemet
+        /// Checks if plate exists
         /// </summary>
         /// <param name="lPlate"></param>
         /// <returns></returns>
@@ -168,10 +169,10 @@ namespace WashWorldParking.BLL
         }
 
         /// <summary>
-        /// Ser om en given p-type er ledig
+        /// Checks if the parling space/type is available
         /// </summary>
-        /// <param name="box">INT/Type</param>
-        /// <returns>Boolean om der er optaget</returns>
+        /// <param name="box"></param>
+        /// <returns></returns>
         private bool CheckAvailability(int box)
         {
             int i = 0;
@@ -184,7 +185,7 @@ namespace WashWorldParking.BLL
         }
 
         /// <summary>
-        /// Super secret admin shit!
+        /// Super secret admin update tool!
         /// </summary>
         /// <param name="lp"></param>
         public void AdminUpd(string lp, string pt, string et, decimal price)
@@ -199,7 +200,7 @@ namespace WashWorldParking.BLL
         private void ParkLoader()
         {
             Parkings = FileLogger.ReadFromPark();
-            Thread.Sleep(2500); //Virtuel ventetid på load
+            Thread.Sleep(2500); //Virtual wait on load
         }
     }
 }

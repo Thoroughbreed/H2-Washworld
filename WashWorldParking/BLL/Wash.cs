@@ -32,7 +32,7 @@ namespace WashWorldParking.BLL
         }
 
         /// <summary>
-        /// Init af vaskehallen
+        /// Init of wash
         /// </summary>
         private void BeginWashThingy()
         {
@@ -63,7 +63,7 @@ namespace WashWorldParking.BLL
 
 
         /// <summary>
-        /// Opretter en (fiktiv) konto til abonnement på gratis bilvask
+        /// Creates a subscription on a car wash
         /// </summary>
         /// <param name="lPlate"></param>
         /// <param name="cCard"></param>
@@ -88,7 +88,7 @@ namespace WashWorldParking.BLL
         }
 
         /// <summary>
-        /// Checker om nummerpladen har abonnement på vaskehallen
+        /// Checks if license plate is subscribed
         /// </summary>
         /// <param name="lPlate"></param>
         /// <returns></returns>
@@ -100,7 +100,7 @@ namespace WashWorldParking.BLL
         }
 
         /// <summary>
-        /// Finder hvilken type man har abonnement på
+        /// Checks the type of subscription
         /// </summary>
         /// <param name="lPlate"></param>
         /// <returns></returns>
@@ -112,25 +112,24 @@ namespace WashWorldParking.BLL
         }
 
         /// <summary>
-        /// Starter vaskehallen (hvis den er ledig) - er der ingen ledige kaster den op
+        /// Starting wash (if available)
         /// </summary>
-        /// <param name="type">Wasketype</param>
-        /// <param name="member">Medlem</param>
-        /// <param name="worker">BGW</param>
+        /// <param name="type">Wash type</param>
+        /// <param name="member">Is member?</param>
+        /// <param name="worker"></param>
         public void StartWash(int type, bool member, BackgroundWorker worker)
 
         {
             WashTypes find = Washes.Find(s => s.Busy == false);
-
             if (find == null) throw new NoWash();
             find.WashNow(type, member, worker);
             find.W.Start();
         }
 
         /// <summary>
-        /// Viser status tekst inklusiv en lille animation
+        /// Shows status text including small animation
         /// </summary>
-        /// <param name="_">Token til at stoppe anim</param>
+        /// <param name="_"></param>
         public void StatusText(CancellationToken _)
         {
             bool work = true;
@@ -138,32 +137,42 @@ namespace WashWorldParking.BLL
             int count = 0;
             while (work)
             {
-                if (_.IsCancellationRequested) _.ThrowIfCancellationRequested(); //stopper anim hvis den er aktiv under exit fra menu
+                if (_.IsCancellationRequested) _.ThrowIfCancellationRequested(); //stops animation
                 else
                 {
                     foreach (var id in Washes)
                     {
-                        if (id.Busy)
+                        if (_.IsCancellationRequested)
                         {
                             Console.SetCursorPosition(30, id.WashID * 2);
-                            Console.WriteLine($"[{id.WashID}] The wash is currently busy");
+                            Console.WriteLine($"[{id.WashID}] The wash is stopped!       ");
                             Console.SetCursorPosition(30, (id.WashID * 2) + 1);
-                            Console.WriteLine("It is currently: " + id.WashStatus);
-                            Thread.Sleep(100);
-                            key = ASCII.HorisontalWash(0, 20, key);
-                            count = 0;
+                            Console.WriteLine("---- EMERGENCY HALTED ----                              ");
                         }
                         else
                         {
-                            Console.SetCursorPosition(30, id.WashID * 2);
-                            Console.WriteLine($"[{id.WashID}] The wash is available      ");
-                            Console.SetCursorPosition(30, (id.WashID * 2) + 1);
-                            Console.WriteLine("---- WAITING FOR CAR ----                              ");
-                            count++;
-                            if (count > 2) //tæller antallet af inaktive vaskehaller. Hvis tallet bliver 3 stopper den l00p
+                            if (id.Busy)
                             {
-                                work = false;
-                                break;
+                                Console.SetCursorPosition(30, id.WashID * 2);
+                                Console.WriteLine($"[{id.WashID}] The wash is currently busy");
+                                Console.SetCursorPosition(30, (id.WashID * 2) + 1);
+                                Console.WriteLine("It is currently: " + id.WashStatus);
+                                Thread.Sleep(100);
+                                key = ASCII.HorisontalWash(0, 20, key);
+                                count = 0;
+                            }
+                            else
+                            {
+                                Console.SetCursorPosition(30, id.WashID * 2);
+                                Console.WriteLine($"[{id.WashID}] The wash is available      ");
+                                Console.SetCursorPosition(30, (id.WashID * 2) + 1);
+                                Console.WriteLine("---- WAITING FOR CAR ----                              ");
+                                count++;
+                                if (count > 2) //Counts the number of active washes
+                                {
+                                    work = false;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -176,7 +185,7 @@ namespace WashWorldParking.BLL
         }
 
         /// <summary>
-        /// Super secret admin shit!
+        /// Super secret admin update tool!
         /// </summary>
         /// <param name="lp"></param>
         public string AdminUpd(WashMembers W, ConsoleKeyInfo a2, string CC, string EM, string LP)

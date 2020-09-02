@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using WashWorldParking.BLL;
 using WashWorldParking.UTIL;
 
 namespace WashWorldParking.REPO
@@ -143,13 +142,23 @@ namespace WashWorldParking.REPO
             Busy = false;
         }
 
+        /// <summary>
+        /// Stops the washes (emergency stop)
+        /// </summary>
         private void Halt(string t)
         {
-            System.Console.WriteLine("!!!! WASH IS STOPPED !!!!");
-            System.Console.WriteLine(t + " is stopped now.");
+            // Uncommented due to UI mixup from old menu
+            // System.Console.WriteLine("!!!! WASH IS STOPPED !!!!");
+            // System.Console.WriteLine(t + " is stopped now.");
             throw new StopWash();
         }
 
+        /// <summary>
+        /// Finds the actual price for a wash
+        /// </summary>
+        /// <param name="member">Is member?</param>
+        /// <param name="type">Wash type</param>
+        /// <returns></returns>
         private decimal GeneratePrice(bool member, int type)
         {
             if (member) return 0;
@@ -159,6 +168,13 @@ namespace WashWorldParking.REPO
             else return 999;
         }
 
+        /// <summary>
+        /// Starts carwash
+        /// </summary>
+        /// <param name="type">Wash type</param>
+        /// <param name="member">Is member?</param>
+        /// <param name="worker">Background worker</param>
+        /// <returns>Price</returns>
         public decimal WashNow(int type, bool member, BackgroundWorker worker)
         {
             switch(type)

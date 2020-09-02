@@ -355,6 +355,7 @@ namespace WashWorldParking
                         if (subMenuKey.Key == ConsoleKey.Y)
                         {
                             myWash.Worker.CancelAsync();
+                            Thread.Sleep(1000); // Waits a second before proceeding to next cancellation step
                             __cts.Cancel();
                             FileLogger.WriteToLog($"Someone pressed the HALT! button real hard ...");
                         }
